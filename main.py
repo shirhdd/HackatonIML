@@ -16,7 +16,8 @@ if __name__ == '__main__':
     dfX, dfy = preprosses(sys.argv[1])
     X, y = pd.to_numpy(dfX), pd.to_numpy(dfy)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
-    knn = KNeighborsClassifier(K, metric=lambda y_true, y_false:  # loss function of inner learner is sum of both loss in the question
+    knn = KNeighborsClassifier(K, metric=lambda y_true, y_false:  # loss function of inner learner is sum of both
+    # loss in the questions
                                f1_score(y_true, y_false, average='micro') + f1_score(y_true, y_false, average='macro'))
     multi_classifier = MultiOutputClassifier(knn, NUM_OF_METASTASES)
     multi_classifier.fit(X_train, y_train)
