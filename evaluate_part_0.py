@@ -27,10 +27,15 @@ from sklearn.metrics import f1_score
 
 
 # Local imports
+# from main import run_predict
 
 
 # ----
-
+TRAIN_X = 'train_sets/train.csv'
+TRAIN_Y = 'train_sets/train_label_0.csv'
+TEST_X = 'tests_sets/test1.csv'
+TEST_Y = 'tests_sets/test1_label_0.csv'
+OUTCOME = 'TR'
 
 def flatten(ls):
     """
@@ -88,6 +93,8 @@ def parse_df_labels(df):
 
 
 if __name__ == "__main__":
+    # args = [TRAIN_X, TRAIN_Y, TEST_X, TEST_Y]
+    # run_predict()
 
     # Parse command line arguments
     args = docopt(__doc__)
