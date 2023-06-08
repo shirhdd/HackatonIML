@@ -99,6 +99,17 @@ def date_process(df):
                     'Surgery date2', 'Surgery date1', 'Diagnosis date']
 
 
+def preprocess_labels_q1(file_path):
+    A = 'אבחנה-Location of distal metastases'
+    df = pd.read_csv(file_path)
+    df = df.loc[df[A] != '[]']
+    myList = []
+    for strings in df[A]:
+        myList.append(strings[2:-2].replace(" ", "").replace("'", "").split(","))
+    df = pd.DataFrame({'labels': myList})
+    return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
+
+
 def preprocessor(df: pd.DataFrame):
     # TODO: check valid date for the 5 dates from the columns
     columns_to_drop = ['Form name', 'User Name', 'Basic stage',
@@ -117,6 +128,8 @@ def preprocessor(df: pd.DataFrame):
     df.drop(columns_to_drop, axis=1, inplace=True)
     X = df.fillna(0)
     return X
+
+
 
 
 def main(filename: str):
