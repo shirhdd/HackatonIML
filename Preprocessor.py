@@ -258,17 +258,14 @@ def extracting_data(df: pd.DataFrame):
                'M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
     df['N -lymph nodes mark (TNM)'] = df[
         'N -lymph nodes mark (TNM)'].str.extract(
-        r'N(\d)', expand=False).astype(
-        'Int64')
+        r'N(\d)', expand=False).replace(np.nan, 0).astype(int)
     df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
-        r'T(\d)', expand=False).astype(
-        'Int64')
+        r'T(\d)', expand=False).replace(np.nan, 0).astype(int)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
         r'L(.)', expand=False)
     df.loc[df['Lymphatic penetration'] == 'I', 'Lymphatic penetration'] = 3
     df['User Name'] = df['User Name'].str.extract(
-        r'(\d+)_Onco', expand=False).astype(
-        'Int64')
+        r'(\d+)_Onco', expand=False).replace(np.nan, 0).astype(int)
     return df
 
 
