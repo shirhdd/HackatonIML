@@ -103,10 +103,10 @@ def preprocess_labels_q1(file_path):
     A = 'אבחנה-Location of distal metastases'
     df = pd.read_csv(file_path)
     myList = []
-    for strings in df[A]:
-        myList.append(strings[2:-2].replace(" ", "").replace("'", "").split(","))
-    df = pd.DataFrame({'labels': myList})
-    return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
+    # for strings in df[A]:
+    #     myList.append(strings[2:-2].replace(" ", "").replace("'", "").split(","))
+    # df = pd.DataFrame({'labels': myList})
+    return pd.get_dummies(df)
 
 
 def preprocessor(df: pd.DataFrame):
