@@ -51,7 +51,7 @@ surgery_bef_aft_activity_map = {'nan': None,
 
 
 def load_data(filename: str):
-    df = pd.read_csv(filename)
+    df = pd.read_csv(filename, dtype=str)
     df.columns = ['Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
                   'Diagnosis date', 'Her2', 'Histological diagnosis',
                   'Histopatological degree', 'Ivi -Lymphovascular invasion',
