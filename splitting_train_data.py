@@ -63,6 +63,7 @@ def split_data(df):
         df['id-hushed_internalpatientid'].isin(test5_healthy))]
     test6 = df[(df['id-hushed_internalpatientid'].isin(test6_ill)) | (
         df['id-hushed_internalpatientid'].isin(test6_healthy))]
+
     train.iloc[:, :-2].to_csv('train_sets\\train.csv', index=False)
     train.iloc[:, -2].to_csv('train_sets\\train_label_0.csv', index=False)
     train.iloc[:, -1].to_csv('train_sets\\train_label_1.csv', index=False)
