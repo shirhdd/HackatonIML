@@ -91,14 +91,6 @@ def split_data(df):
     test6.iloc[:, -2].to_csv('tests_sets\\test6_label_0.csv', index=False)
     test6.iloc[:, -1].to_csv('tests_sets\\test6_label_1.csv', index=False)
 
-    # df[(df['id-hushed_internalpatientid'].isin(train_ill)) | (df['id-hushed_internalpatientid'].isin(train_healthy))].to_csv('train.csv')
-    # df[(df['id-hushed_internalpatientid'].isin(test1_ill)) | (df['id-hushed_internalpatientid'].isin(test1_healthy))].to_csv('tests_sets\\test1.csv')
-    # df[(df['id-hushed_internalpatientid'].isin(test2_ill)) | (df['id-hushed_internalpatientid'].isin(test2_healthy))].to_csv('tests_sets\\test2.csv')
-    # df[(df['id-hushed_internalpatientid'].isin(test3_ill)) | (df['id-hushed_internalpatientid'].isin(test3_healthy))].to_csv('tests_sets\\test3.csv')
-    # df[(df['id-hushed_internalpatientid'].isin(test4_ill)) | (df['id-hushed_internalpatientid'].isin(test4_healthy))].to_csv('tests_sets\\test4.csv')
-    # df[(df['id-hushed_internalpatientid'].isin(test5_ill)) | (df['id-hushed_internalpatientid'].isin(test5_healthy))].to_csv('tests_sets\\test5.csv')
-    # df[(df['id-hushed_internalpatientid'].isin(test6_ill)) | (df['id-hushed_internalpatientid'].isin(test6_healthy))].to_csv('tests_sets\\test6.csv')
-
 
 # ADR-Adrenals  BON-Bones  BRA-Brain  HEP-Hepatic  LYM-Lymphnodes  MAR-BoneMarrow  OTH-Other  PER-Peritoneum  PLE-Pleura  PUL-Pulmonary  SKI-Skin
 if __name__ == '__main__':

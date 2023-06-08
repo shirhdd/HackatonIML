@@ -83,11 +83,11 @@ def extracting_data(df: pd.DataFrame):
         r'M(.)', expand=False)
     df.loc[df[
                'M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
-    df['N -lymph nodes mark (TNM)'] = df[
-        'N -lymph nodes mark (TNM)'].str.extract(
-        r'N(.)', expand=False)
-    df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
-        r'T(.)', expand=False)
+    # df['N -lymph nodes mark (TNM)'] = df[
+    #     'N -lymph nodes mark (TNM)'].str.extract(
+    #     r'N(.)', expand=False)
+    # df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
+    #     r'T(.)', expand=False)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
         r'L(.)', expand=False)
     df.loc[df['Lymphatic penetration'] == 'I', 'Lymphatic penetration'] = 3
@@ -123,8 +123,7 @@ def preprocess_labels_q1(file_path):
     df = pd.read_csv(file_path)
     myList = []
     for strings in df[A]:
-        myList.append(
-            strings[2:-2].replace(" ", "").replace("'", "").split(","))
+        myList.append(strings[2:-2].replace(" ", "").replace("'", "").split(","))
     df = pd.DataFrame({'labels': myList})
     return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
 
@@ -160,12 +159,12 @@ def preprocessor(df: pd.DataFrame):
         # 'Lymphatic penetration',
         # 'M -metastases mark (TNM)',
         # 'Margin Type',
-        # 'N -lymph nodes mark (TNM)',
+        'N -lymph nodes mark (TNM)',
         'Side', 'Stage',
         'Surgery date1', 'Surgery date2', 'Surgery date3',
         'Surgery name1', 'Surgery name2',
         'Surgery name3',
-        # 'T -Tumor mark (TNM)',
+        'T -Tumor mark (TNM)',
         'er', 'pr',
         'surgery before or after-Activity date',
         #  'surgery before or after-Actual activity',
