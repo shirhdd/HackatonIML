@@ -1,4 +1,8 @@
 import sys
+import itertools
+from typing import List
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -15,15 +19,32 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.cluster import KMeans
 from sklearn.gaussian_process import GaussianProcessClassifier
 
-import itertools
+REGRESSION = "1"
+
+CLASSIFICATION = "0"
+
+PREDICTION_TYPE = 1
+X_TRAIN_FILE = 2
+Y_TRAIN_FILE = 3
+X_TEST_FILE = 4
 
 NUM_OF_METASTASES = 11
 K = 10
-ALPHA = 0.3
+ALPHA = 1
 
-COLUMN_NAMES_SPACE = ['ADR - Adrenals', 'BON - Bones', 'BRA - Brain', 'HEP - Hepatic', 'LYM - Lymphnodes',
-                      'MAR - BoneMarrow', 'OTH - Other', 'PER - Peritoneum', 'PLE - Pleura', 'PUL - Pulmonary',
-                      'SKI - Skin']
+COLUMN_NAMES_SPACE = [
+    'ADR - Adrenals',
+    'BON - Bones',
+    'BRA - Brain',
+    'HEP - Hepatic',
+    'LYM - Lymphnodes',
+    'MAR - BoneMarrow',
+    'OTH - Other',
+    'PER - Peritoneum',
+    'PLE - Pleura',
+    'PUL - Pulmonary',
+    'SKI - Skin'
+]
 
 
 def flatten(ls):
@@ -88,28 +109,20 @@ def indicator_matrix_to_lists(dummies, col_names) -> pd.DataFrame:
         true_values = row[row == 1].index.tolist()
         true_columns.append(true_values)
     dummies['אבחנה-Location of distal metastases'] = true_columns
-    return pd.DataFrame(dummies['אבחנה-Location of distal metastases'], columns=['אבחנה-Location of distal metastases'])
-    # return dummies['אבחנה-Location of distal metastases']
+    return dummies['אבחנה-Location of distal metastases']
 
 
-def loss_func(y_pred, y_true):
-    return f1_score(y_true=y_true, y_pred=y_pred, average="macro")
-
-
-def predicting_metastases_v1(X_train, X_test, y_train, col_names, param):
-    algo = ensemble.RandomForestClassifier(max_depth=param, random_state=42, class_weight="balanced")
-    # algo = ensemble.AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), n_estimators=param)
-    # algo = DecisionTreeClassifier(max_depth=param)
-    # algo = RidgeClassifier(alpha=param)
-    algo = GaussianProcessClassifier(max_iter_predict=param)
-    classifier = OneVsRestClassifier(estimator=algo)
+def predicting_metastases_v1(X_train, X_test, y_train, col_names):
+    random_forest = ensemble.RandomForestClassifier(max_depth=10, random_state=42, class_weight="balanced")
+    classifier = OneVsRestClassifier(estimator=random_forest)
     classifier.fit(X_train, y_train)
     pred = classifier.predict(X_test)
 
-    return indicator_matrix_to_lists(pred, col_names)
+    pred_df = indicator_matrix_to_lists(pred, col_names)
+    pred_df.to_csv("submission/predictions/1.csv", index=False)
 
 
-def preprocess_y(y_file):
+def classification_preprocess_y(y_file):
     dfy_train = parse_df_labels(pd.read_csv(y_file, keep_default_na=False))
     enc = Encode_Multi_Hot()
     dfy_train_vals = dfy_train["vals"]
@@ -119,24 +132,55 @@ def preprocess_y(y_file):
     return dfy_train_multi_hot, col_names
 
 
-def load_files_to_array(train_x_file, test_x_file, train_y_file):
+def regression_preprocess_y(y_file: str) -> Tuple[np.array, List[str]]:
+    dfy_train = parse_df_labels(pd.read_csv(y_file, keep_default_na=False, dtype={'אבחנה-Tumor size': str}))
+    dfy_train_vals = np.array(dfy_train["vals"])
+    col_names = []
+
+    return dfy_train_vals, col_names
+
+
+def load_files_to_array(argv):
     # load files
-    dfX_train = preprocessor(load_data(train_x_file))
-    dfX_test = preprocessor(load_data(train_y_file))
+    dfX_train = preprocessor(load_data(argv[X_TRAIN_FILE]))
+    dfX_test = preprocessor(load_data(argv[X_TEST_FILE]))
 
     # get labels
+    if (argv[PREDICTION_TYPE] == "0"):
+        dfy_train, col_names = classification_preprocess_y(argv[Y_TRAIN_FILE])
+        X_train, y_train = dfX_train.to_numpy(), dfy_train.astype(int)
+    else:
+        dfy_train, col_names = regression_preprocess_y(argv[Y_TRAIN_FILE])
+        X_train, y_train = dfX_train.to_numpy(), dfy_train.astype(float)
 
-    dfy_train_multi_hot, col_names = preprocess_y(test_x_file)
-    X_train, y_train = dfX_train.to_numpy(), dfy_train_multi_hot.astype(int)
     X_test = dfX_test.to_numpy()
     return X_train, y_train, X_test, col_names
 
 
-def predicting_tumer_size_v1(X_train, X_test, y_train, y_test):
+def predicting_tumer_size_v1(X_train, X_test, y_train):
     lasso = Lasso(ALPHA)
     lasso.fit(X_train, y_train)
+    pred = lasso.predict(X_test)
+    pd.DataFrame(pred).to_csv("submission/predictions/2.csv", header=["אבחנה-Tumor size"], index=False)
 
 
+# def predicting_tumer_size_v1(X_train, X_test, y_train, y_test):
+#     # TODO: remove
+#
+#     gold_fn = "tests_sets/test1_label_1.csv"
+#     gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False, dtype={'אבחנה-Tumor size': str}))
+#     gold_vals = gold_labels["vals"]
+#
+#     #min loss: 3.745278371442692, argmin: 2650.0
+#     alphas = np.linspace(2650, 3000, 40)
+#     loss = np.zeros(len(alphas))
+#     for i, a in enumerate(alphas):
+#         lasso = Ridge(alpha=a)
+#         lasso.fit(X_train, y_train)
+#         pred = lasso.predict(X_test)
+#         loss[i] = mean_squared_error(y_true=gold_vals, y_pred=pred)
+#
+#     print(f"min loss: {np.min(loss)}, argmin: {alphas[np.argmin(loss)]}")
 def run_predict_q1(X_train_file, y_train_file, X_test_file, param):
     X_train, y_train, X_test, col_names = load_files_to_array(X_train_file, y_train_file, X_test_file)
 
@@ -145,13 +189,32 @@ def run_predict_q1(X_train_file, y_train_file, X_test_file, param):
 
 
 if __name__ == '__main__':
+    # TODO: VALIDATE ARGS
+
     X_train, y_train, X_test, col_names = load_files_to_array(sys.argv)
     #  TODO: remove - its for debugging
     # train_after_parse = indicator_matrix_to_lists(y_test, col_names)
     # pd.DataFrame(train_after_parse).to_csv("tree_pred.csv", index=False)
 
     # Q1
-    predicting_metastases_v1(X_train, X_test, y_train, col_names)
+    if (sys.argv[PREDICTION_TYPE] == CLASSIFICATION):
+        predicting_metastases_v1(X_train, X_test, y_train, col_names)
 
     # Q2
-    # predicting_tumer_size_v1(X_train, X_test, y_train, y_test)
+    if (sys.argv[PREDICTION_TYPE] == REGRESSION):
+        predicting_tumer_size_v1(X_train, X_test, y_train)
+
+
+def result_eval(y_pred, y_true):
+    y_pred = y_pred.reshape(y_pred.size)
+    y_true = y_true.reshape(y_true.size)
+    wrong = np.sum(y_pred != y_true)
+    pred_positive_index = np.where(y_pred != '[]')
+    false_positive = np.sum(y_pred[pred_positive_index] != y_true[pred_positive_index])
+    pred_negative_index = np.where(y_pred == '[]')
+    print("number of wrong classifications", wrong)
+    print("number of correct classification ", y_pred.size - wrong)
+    print("number of false positive", false_positive)
+    print("number of false negative ", wrong - false_positive)
+    print("number of true positive ", )
+    print("predicted negative ", len(pred_negative_index[0]))

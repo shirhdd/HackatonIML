@@ -6,6 +6,8 @@ from utils import MarginType
 from utils import Side
 from utils import SurgeryActivity
 
+YOUNG_AGE = 40
+
 stage_map_size = {
     '0': 0,
     '0a': 0,
@@ -230,6 +232,22 @@ def create_dummies(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['surgery before or after-Actual activity'])
     return df
 
+def create_new_features(df: pd.DataFrame) -> pd.DataFrame:
+    df["is_young"] = np.where(df["Age"] < YOUNG_AGE, 1, 0)
+
+    # handle tumor volume
+    df['tumor_volume'] = df['Lymphatic penetration'] * df['Tumor width']
+
+    # Define the bin edges
+    tumor_volume_bins = [0, 5, 10, 20, float('inf')]
+
+    # Define the labels for the bins
+    labels = ['0-5', '5-10', '10-20', '20+']
+
+    # Create a new column with the bin labels based on the numeric_column values
+    df['bin_column'] = pd.cut(df['tumor_volume'], bins=tumor_volume_bins, labels=labels, right=False)
+
+    print(df['bin_column'].head())
 
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
@@ -326,6 +344,7 @@ def handling_features(df: pd.DataFrame):
     df = handle_Ivi(df)
     # df = date_process(df)
     df = create_dummies(df)
+    df = create_new_features(df)
     return df
 
 

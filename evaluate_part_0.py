@@ -25,15 +25,6 @@ import itertools
 import numpy as np
 from sklearn.metrics import f1_score
 
-# Local imports
-from main import run_predict_q1
-
-# ----
-TRAIN_X_FILE = 'train_sets/train.csv'
-TRAIN_Y_FILE = 'train_sets/train_label_0.csv'
-TEST_X_FILE = 'tests_sets/test1.csv'
-TEST_Y_FILE = 'tests_sets/test1_label_0.csv'
-
 
 def flatten(ls):
     """
@@ -42,13 +33,11 @@ def flatten(ls):
     flat_ls = list(itertools.chain.from_iterable(ls))
     return flat_ls
 
-
 class Encode_Multi_Hot:
     """
     change the variable length format into a
     fixed size one hot vector per each label
     """
-
     def __init__(self):
         """
         init data structures
@@ -91,33 +80,67 @@ def parse_df_labels(df):
 
 
 if __name__ == "__main__":
-    for param in range(1, 200, 10):
-        pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE, param)
-        gold_fn = Path(TEST_Y_FILE)
+    # # Local imports
+    # from main import run_predict_q1
 
-        gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
-        pred_labels = parse_df_labels(pred.astype(str))
+    # TRAIN_X_FILE = 'train_sets/train.csv'
+    # TRAIN_Y_FILE = 'train_sets/train_label_0.csv'
+    # TEST_X_FILE = 'tests_sets/test1.csv'
+    # TEST_Y_FILE = 'tests_sets/test1_label_0.csv'
 
-        # make sure that the same label is annotated in pred and gold
-        assert (gold_labels["resp"] == pred_labels["resp"])
-        enc = Encode_Multi_Hot()
-        gold_vals = gold_labels["vals"]
-        pred_vals = pred_labels["vals"]
+    # pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE)
+    # gold_fn = Path(TEST_Y_FILE)
 
-        # make sure pred and gold annotate the same # of features
-        assert (len(gold_vals) == len(pred_vals))
-        enc.fit(gold_vals + pred_vals)
+    # pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE)
+    # gold_fn = Path(TEST_Y_FILE)
+    # gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
+    # pred_labels = parse_df_labels(pred.astype(str))
 
-        gold_multi_hot = np.array([enc.enc(val) for val in gold_vals])
-        pred_multi_hot = np.array([enc.enc(val) for val in pred_vals])
 
-        # Print micro-macro f1
-        macro_f1 = f1_score(y_true=gold_multi_hot,
-                            y_pred=pred_multi_hot,
-                            average="macro")
 
-        micro_f1 = f1_score(y_true=gold_multi_hot,
-                            y_pred=pred_multi_hot,
-                            average="micro")
+    # Parse command line arguments
+    args = docopt(__doc__)
+    gold_fn = Path(args["--gold"])
+    pred_fn = Path(args["--pred"])
 
-        print(f"param = {param}, Micro f1 = {micro_f1}, Macro f1 = {macro_f1} \n")
+    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
+    pred_labels = parse_df_labels(pd.read_csv(pred_fn, keep_default_na = False))
+
+    # Determine logging level
+    debug = args["--debug"]
+    if debug:
+        logging.basicConfig(level = logging.DEBUG)
+    else:
+        logging.basicConfig(level = logging.INFO)
+
+    # Start computation
+    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na = False))
+    pred_labels = parse_df_labels(pd.read_csv(pred_fn, keep_default_na = False))
+
+    # make sure that the same label is annotated in pred and gold
+    assert(gold_labels["resp"] == pred_labels["resp"])
+    enc = Encode_Multi_Hot()
+    gold_vals = gold_labels["vals"]
+    pred_vals = pred_labels["vals"]
+
+    # make sure pred and gold annotate the same # of features
+    assert(len(gold_vals) == len(pred_vals))
+    enc.fit(gold_vals + pred_vals)
+
+
+    gold_multi_hot = np.array([enc.enc(val) for val in gold_vals])
+    pred_multi_hot = np.array([enc.enc(val) for val in pred_vals])
+
+    # Print micro-macro f1
+    macro_f1 = f1_score(y_true = gold_multi_hot,
+                        y_pred = pred_multi_hot,
+                        average = "macro")
+
+    micro_f1 = f1_score(y_true = gold_multi_hot,
+                        y_pred = pred_multi_hot,
+                        average = "micro")
+
+    logging.info(f"Micro f1 = {micro_f1} \n Macro f1 = {macro_f1}")
+
+    # End
+    logging.info("DONE")
