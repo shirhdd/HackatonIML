@@ -27,15 +27,14 @@ from sklearn.metrics import f1_score
 
 
 # Local imports
-# from main import run_predict
+from main import run_predict_q1
 
 
 # ----
-TRAIN_X = 'train_sets/train.csv'
-TRAIN_Y = 'train_sets/train_label_0.csv'
-TEST_X = 'tests_sets/test1.csv'
-TEST_Y = 'tests_sets/test1_label_0.csv'
-OUTCOME = 'TR'
+TRAIN_X_FILE = 'train_sets/train.csv'
+TRAIN_Y_FILE = 'train_sets/train_label_0.csv'
+TEST_X_FILE = 'tests_sets/test1.csv'
+TEST_Y_FILE = 'tests_sets/test1_label_0.csv'
 
 def flatten(ls):
     """
@@ -93,24 +92,11 @@ def parse_df_labels(df):
 
 
 if __name__ == "__main__":
-    # args = [TRAIN_X, TRAIN_Y, TEST_X, TEST_Y]
-    # run_predict()
+    pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE)
+    gold_fn = Path(TEST_Y_FILE)
 
-    # Parse command line arguments
-    args = docopt(__doc__)
-    gold_fn = Path(args["--gold"])
-    pred_fn = Path(args["--pred"])
-
-    # Determine logging level
-    debug = args["--debug"]
-    if debug:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
-    # Start computation
     gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
-    pred_labels = parse_df_labels(pd.read_csv(pred_fn, keep_default_na=False))
+    pred_labels = parse_df_labels(pred.astype(str))
 
     # make sure that the same label is annotated in pred and gold
     assert (gold_labels["resp"] == pred_labels["resp"])
@@ -134,7 +120,7 @@ if __name__ == "__main__":
                         y_pred=pred_multi_hot,
                         average="micro")
 
-    logging.info(f"Micro f1 = {micro_f1} \n Macro f1 = {macro_f1}")
+    print(f"Micro f1 = {micro_f1} \n Macro f1 = {macro_f1}")
 
     # End
     logging.info("DONE")
