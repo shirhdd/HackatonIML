@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn import decomposition
+from sklearn import datasets
+import Preprocessor
 
 TRAIN_FILE_PATH = "given_sets\\train.feats.csv"
 LABEL_0_FILE_PATH = "given_sets\\train.labels.0.csv"
@@ -29,9 +32,9 @@ def split_data(df):
                  0.8 * num_of_ill_patients,
                  0.9 * num_of_ill_patients])).astype(int)
     train_ill, test1_ill, test2_ill, test3_ill, test4_ill, test5_ill, test6_ill = np.split(ill,
-                                                               [train, test1,
-                                                                test2, test3,
-                                                                test4, test5])
+                                                                                           [train, test1,
+                                                                                            test2, test3,
+                                                                                            test4, test5])
     healthy = np.random.permutation(healthy)
     num_of_healthy_patients = len(healthy)
     train, test1, test2, test3, test4, test5 = np.array(
@@ -46,8 +49,10 @@ def split_data(df):
         [train, test1,
          test2, test3,
          test4, test5])
-    train = df[(df['id-hushed_internalpatientid'].isin(train_ill)) | (df['id-hushed_internalpatientid'].isin(train_healthy))]
-    test1 = df[(df['id-hushed_internalpatientid'].isin(test1_ill)) | (df['id-hushed_internalpatientid'].isin(test1_healthy))]
+    train = df[
+        (df['id-hushed_internalpatientid'].isin(train_ill)) | (df['id-hushed_internalpatientid'].isin(train_healthy))]
+    test1 = df[
+        (df['id-hushed_internalpatientid'].isin(test1_ill)) | (df['id-hushed_internalpatientid'].isin(test1_healthy))]
     test2 = df[(df['id-hushed_internalpatientid'].isin(test2_ill)) | (
         df['id-hushed_internalpatientid'].isin(test2_healthy))]
     test3 = df[(df['id-hushed_internalpatientid'].isin(test3_ill)) | (
@@ -95,22 +100,9 @@ def split_data(df):
     # df[(df['id-hushed_internalpatientid'].isin(test6_ill)) | (df['id-hushed_internalpatientid'].isin(test6_healthy))].to_csv('tests_sets\\test6.csv')
 
 
+# ADR-Adrenals  BON-Bones  BRA-Brain  HEP-Hepatic  LYM-Lymphnodes  MAR-BoneMarrow  OTH-Other  PER-Peritoneum  PLE-Pleura  PUL-Pulmonary  SKI-Skin
 if __name__ == '__main__':
     np.random.seed(0)
-    df = load_train_data()
-    split_data(df)
-    # train = pd.read_csv('train.csv').to_numpy()
-    # pca = sklearn.decomposition.PCA(n_components=2)
-    # pca.fit(train)
-    # X_pca = pca.transform(train)
-    # target_ids = range(len(iris.target_names))
-    #
-    # from matplotlib import pyplot as plt
-    #
-    # plt.figure(figsize=(6, 5))
-    # for i, c, label in zip(target_ids, 'rgbcmykw', iris.target_names):
-    #     plt.scatter(X_pca[y == i, 0], X_pca[y == i, 1],
-    #                 c=c, label=label)
-    # plt.legend()
-    # plt.show()
+    # df = load_train_data()
+    # split_data(df)
 

@@ -1,5 +1,53 @@
 import pandas as pd
-from utils import Side, MarginType, BasicStage, FormName, SurgeryActivity
+
+from utils import BasicStage
+from utils import FormName
+from utils import MarginType
+from utils import Side
+from utils import SurgeryActivity
+
+side_map = {
+    'nan': Side.none.value,
+    'שמאל': Side.left.value,
+    'ימין': Side.right.value,
+    'דו צדדי': Side.both.value,
+}
+margin_type_map = {
+    'ללא': MarginType.without.value,
+    'נקיים': MarginType.clean.value,
+    'נגועים': MarginType.infected.value,
+}
+basic_stage_map = {
+    'c - Clinical': BasicStage.clinical.value,
+    'p - Pathological': BasicStage.pathological.value,
+    'Null': None,
+    'r - Reccurent': BasicStage.recurrent.value
+}
+form_name_map = {
+    'דיווח סיעודי': FormName.nursing_report.value,
+    'ביקור במרפאה': FormName.visit_the_clinic.value,
+    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report.value,
+    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic.value,
+    'אנמנזה סיעודית': FormName.nursing_anamnesis.value,
+    'אנמנזה רפואית': FormName.medical_anamnesis.value,
+    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic.value,
+    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis.value,
+    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis.value,
+}
+surgery_bef_aft_activity_map = {
+    'nan': None,
+    'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring.value,
+    'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands.value,
+    'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands.value,
+    'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy.value,
+    'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access.value,
+    '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam.value,
+    'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown.value,
+    'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands.value,
+    'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands.value,
+    'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery.value,
+    'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_in_surgery.value,
+}
 
 side_map = {'nan': Side.none,
             'שמאל': Side.left,
@@ -37,7 +85,11 @@ COLUMN_NAMES = ['ADR-Adrenals', 'BON-Bones', 'BRA-Brain', 'HEP-Hepatic', 'LYM-Ly
                 'OTH-Other', 'PER-Peritoneum', 'PLE-Pleura', 'PUL-Pulmonary',  'SKI-Skin']
 
 def load_data(filename: str):
-    df = pd.read_csv(filename)
+    df = pd.read_csv(filename, dtype={
+        'אבחנה-Surgery date3': str,
+        'אבחנה-Surgery name3': str,
+        'אבחנה-Ivi -Lymphovascular invasion': str
+    })
     df.columns = ['Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
                   'Diagnosis date', 'Her2', 'Histological diagnosis',
                   'Histopatological degree', 'Ivi -Lymphovascular invasion',
@@ -135,31 +187,31 @@ def to_number(df):
 
 
 def preprocessor(df: pd.DataFrame):
-    columns_to_drop = [  'Form name',
-        'User Name',
-        'Basic stage',
+    columns_to_drop = [  # 'Form name',
+        # 'User Name',
+        # 'Basic stage',
         'Diagnosis date',
         'Her2', 'Histological diagnosis',
-        'Histopatological degree',
+        # 'Histopatological degree',
         'Ivi -Lymphovascular invasion',
         'KI67 protein',
-        'Lymphatic penetration',
-        'M -metastases mark (TNM)',
-        'Margin Type',
-        'N -lymph nodes mark (TNM)',
+        # 'Lymphatic penetration',
+        # 'M -metastases mark (TNM)',
+        # 'Margin Type',
+        # 'N -lymph nodes mark (TNM)',
         'Side', 'Stage',
         'Surgery date1', 'Surgery date2', 'Surgery date3',
         'Surgery name1', 'Surgery name2',
         'Surgery name3',
-        'T -Tumor mark (TNM)',
+        # 'T -Tumor mark (TNM)',
         'er', 'pr',
         'surgery before or after-Activity date',
-        'surgery before or after-Actual activity',
+        #  'surgery before or after-Actual activity',
         'id-hushed_internalpatientid']
     df.drop(columns_to_drop, axis=1, inplace=True)
     df = to_number(df)
-    # df = extracting_data(df)
-    # df = map_data(df)
+    df = extracting_data(df)
+    df = map_data(df)
     # df = date_process(df)
     X = df.fillna(0)
     return X
