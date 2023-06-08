@@ -33,7 +33,8 @@ surgery_bef_aft_activity_map = {'nan': None,
                                 'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands,
                                 'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands,
                                 'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery}
-
+COLUMN_NAMES = ['ADR-Adrenals', 'BON-Bones', 'BRA-Brain', 'HEP-Hepatic', 'LYM-Lymphnodes', 'MAR-BoneMarrow',
+                'OTH-Other', 'PER-Peritoneum', 'PLE-Pleura', 'PUL-Pulmonary',  'SKI-Skin']
 
 def load_data(filename: str):
     df = pd.read_csv(filename)
@@ -104,10 +105,14 @@ def preprocess_labels_q1(file_path):
     df = pd.read_csv(file_path)
     myList = []
     for strings in df[A]:
-        myList.append(
-            strings[2:-2].replace(" ", "").replace("'", "").split(","))
+        labels = strings[2:-2].replace("'", "").split(", ")
+        if labels != ['']:
+            myList.append(labels)
+        else:
+            myList.append('[]')
     df = pd.DataFrame({'labels': myList})
-    return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
+    df = pd.get_dummies(df.explode(column='labels'), prefix="", prefix_sep="").groupby(level=0).sum()
+    return df
 
 
 def to_number(df):
@@ -130,31 +135,31 @@ def to_number(df):
 
 
 def preprocessor(df: pd.DataFrame):
-    columns_to_drop = [  # 'Form name',
-        # 'User Name',
-        # 'Basic stage',
+    columns_to_drop = [  'Form name',
+        'User Name',
+        'Basic stage',
         'Diagnosis date',
         'Her2', 'Histological diagnosis',
-        # 'Histopatological degree',
+        'Histopatological degree',
         'Ivi -Lymphovascular invasion',
         'KI67 protein',
-        # 'Lymphatic penetration',
-        # 'M -metastases mark (TNM)',
-        # 'Margin Type',
-        # 'N -lymph nodes mark (TNM)',
+        'Lymphatic penetration',
+        'M -metastases mark (TNM)',
+        'Margin Type',
+        'N -lymph nodes mark (TNM)',
         'Side', 'Stage',
         'Surgery date1', 'Surgery date2', 'Surgery date3',
         'Surgery name1', 'Surgery name2',
         'Surgery name3',
-        # 'T -Tumor mark (TNM)',
+        'T -Tumor mark (TNM)',
         'er', 'pr',
         'surgery before or after-Activity date',
-        #  'surgery before or after-Actual activity',
+        'surgery before or after-Actual activity',
         'id-hushed_internalpatientid']
     df.drop(columns_to_drop, axis=1, inplace=True)
     df = to_number(df)
-    df = extracting_data(df)
-    df = map_data(df)
+    # df = extracting_data(df)
+    # df = map_data(df)
     # df = date_process(df)
     X = df.fillna(0)
     return X
