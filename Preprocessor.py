@@ -167,7 +167,9 @@ def toNumber(df):
         'Int64')
     df['Age'] = pd.to_numeric(df['Age'], errors='coerce').astype(
         float)
-
+    df['Tumor width'] = pd.to_numeric(df['Tumor width'],
+                                      errors='coerce').astype(
+        float)
     return df
 
 
