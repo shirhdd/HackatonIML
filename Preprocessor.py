@@ -1,10 +1,46 @@
 import pandas as pd
-
+import numpy as np
 from utils import BasicStage
 from utils import FormName
 from utils import MarginType
 from utils import Side
 from utils import SurgeryActivity
+
+stage_map_size = {
+    '0': 0,
+    '0a': 0,
+    '0is': 0,  # invasive cancer
+    '1': 0.1,
+    '1a': 0.3,
+    '1b': 0.75,
+    '1c': 1.5,
+    '2': 3,
+    '2a': 3.5,
+    '2b': 4.5,
+    '3': 5,
+    '3a': 6,
+    '3b': 7,
+    '3c': 8,
+    '4': 10
+}
+stage_map_types = {
+    '0': 0.0,
+    '0a': 0.1,
+    '0is': 0.2,  # invasive cancer
+    '1': 1.0,
+    '1a': 1.1,
+    '1b': 1.2,
+    '1c': 1.3,
+    '2': 2,
+    '2a': 2.1,
+    '2b': 2.2,
+    '2c': 2.3,
+    '3': 3.0,
+    '3a': 3.1,
+    '3b': 3.2,
+    '3c': 3.3,
+    '4': 4
+}
 
 side_map = {
     'nan': Side.none.value,
@@ -106,12 +142,115 @@ def load_data(filename: str):
     return df
 
 
+def handle_Ivi(df):
+    conditions = [
+        df['Ivi -Lymphovascular invasion'].str.contains(r'neg', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'pos', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'-', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'no', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'\(-\)', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'\(+\)', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'extensive',
+                                                        case=False, na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'none', case=False,
+                                                        na=False)]
+
+    choices = [-1, 1, -1, -1, -1, 1, 1, 0]
+
+    df['Ivi -Lymphovascular invasion'] = np.select(conditions, choices,
+                                                   default=None)
+    return df
+
+
+def handle_KI_protein(df):
+    pattern1 = r'(\d+)\s*%'
+    pattern2 = r'^(\d+)$'
+
+    # Create a new column 'Percent KI67 protein' and extract the values
+    df['Percent KI67 protein'] = df['KI67 protein'].str.extract(pattern1,
+                                                                expand=False)
+    df['Percent KI67 protein'] = df['Percent KI67 protein'].fillna(
+        df['KI67 protein'].str.extract(pattern2, expand=False))
+
+    # Handle the case when a range of percentages is present
+    range_pattern = r'(\d+)\s*%?\s*-\s*(\d+)\s*%?'
+    ranges = df['KI67 protein'].str.extract(range_pattern)
+    mask = ranges.notnull().all(axis=1)
+    df.loc[mask, 'Percent KI67 protein'] = ranges[mask].astype(float).max(
+        axis=1)
+
+    # Fill 0 for date values
+    date_pattern = r'\d{1,2}-[A-Za-z]{3}'
+    is_date = df['KI67 protein'].str.contains(date_pattern, na=False)
+    df.loc[is_date, 'Percent KI67 protein'] = 0
+
+    # Convert the column to float
+    df['Percent KI67 protein'] = df['Percent KI67 protein'].fillna(0).astype(
+        float)
+    df.drop('KI67 protein', axis=1, inplace=True)
+    return df
+
+
+def handle_stage(df):
+    df['Stage'] = df['Stage'].str.extract(
+        r'Stage(.*)', expand=False)
+    df['Stage'] = df['Stage'].map(stage_map_size)
+    return df
+
+
+def handle_pr_er(df):
+    for _ in ['pr', 'er']:
+        conditions = [
+            df[_].str.contains(r'neg', case=False, na=False),
+            df[_].str.contains(r'pos', case=False, na=False),
+            df[_].str.contains(r'\+', case=False, na=False),
+            df[_].str.contains(r'3', case=False, na=False),
+            df[_].str.contains(r'\(-\)', case=False, na=False),
+            (df[_].str.contains(r'(\d{2,})%?', case=False, na=False)) & (
+                    df[_].str.extract(r'(\d{2,})%?', expand=False).astype(
+                        float) >= 50),
+            (df[_].str.contains(r'(\d{2,})%?', case=False, na=False)) & (
+                    df[_].str.extract(r'(\d{2,})%?', expand=False).astype(
+                        float) < 50)]
+
+        choices = [-1, 1, 1, 1, -1, 1, -1]
+
+        df[_] = np.select(conditions, choices, default=None)
+    return df
+
+
+# -1=neg,0=undefined,1=pos
+def handle_Her2(df):
+    conditions = [
+        df['Her2'].str.contains(r'neg', case=False, na=False),
+        df['Her2'].str.contains(r'pos', case=False, na=False),
+        df['Her2'].str.contains(r'[0|1]', case=False, na=False),
+        df['Her2'].str.contains(r'2', case=False, na=False),
+        df['Her2'].str.contains(r'3', case=False, na=False),
+        df['Her2'].str.contains(r'\(-\)', case=False, na=False),
+        df['Her2'].str.contains(r'^FISH$', case=False, na=False),
+        df['Her2'].str.contains(r'\+\+\+', case=False, na=False),
+        df['Her2'].str.contains(r'non', case=False, na=False),
+        df['Her2'].str.contains(r'\@', case=False, na=False),
+        df['Her2'].str.contains(r'^\+$', case=False, na=False),
+    ]
+
+    choices = [-1, 1, -1, 0, 1, -1, 1, 1, 0, 0, 1]
+
+    df['Her2'] = np.select(conditions, choices, default=None)
+    return df
+
+
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
         r'G(.)', expand=False)
-    df.loc[df['Histopatological degree'] == 'X', 'Histopatological degree'] = 0
-    # df['Stage'] = df['Stage'].str.extract(
-    #     r'(Stage.+))', expand=False) //TODO: there are values with nan/LA/not yet
+    df.loc[df['Histopatological degree'] == 'X', 'Histopatological degree'] = 5
     df['M -metastases mark (TNM)'] = df[
         'M -metastases mark (TNM)'].str.extract(
         r'M(.)', expand=False)
@@ -119,18 +258,22 @@ def extracting_data(df: pd.DataFrame):
                'M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
     df['N -lymph nodes mark (TNM)'] = df[
         'N -lymph nodes mark (TNM)'].str.extract(
-        r'N(.)', expand=False)
+        r'N(\d)', expand=False).astype(
+        'Int64')
     df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
-        r'T(.)', expand=False)
+        r'T(\d)', expand=False).astype(
+        'Int64')
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
         r'L(.)', expand=False)
     df.loc[df['Lymphatic penetration'] == 'I', 'Lymphatic penetration'] = 3
     df['User Name'] = df['User Name'].str.extract(
-        r'(\d+)_Onco', expand=False)
+        r'(\d+)_Onco', expand=False).astype(
+        'Int64')
     return df
 
 
 def map_data(df):
+    df['Side'] = df['Side'].map(side_map)
     df['Form name'] = df['Form name'].map(form_name_map)
     df['Basic stage'] = df['Basic stage'].map(basic_stage_map)
     df['Margin Type'] = df['Margin Type'].map(margin_type_map)
@@ -186,33 +329,47 @@ def to_number(df):
     return df
 
 
+def handling_features(df: pd.DataFrame):
+    df = extracting_data(df)
+    df = map_data(df)
+    df = handle_Her2(df)
+    df = handle_stage(df)
+    df = handle_pr_er(df)
+    df = handle_KI_protein(df)
+    df = handle_Ivi(df)
+    df = date_process(df)
+    return df
+
+
 def preprocessor(df: pd.DataFrame):
     columns_to_drop = [  # 'Form name',
         # 'User Name',
         # 'Basic stage',
-        'Diagnosis date',
-        'Her2', 'Histological diagnosis',
+        # 'Diagnosis date',
+        # 'Her2',
+        'Histological diagnosis',
         # 'Histopatological degree',
-        'Ivi -Lymphovascular invasion',
-        'KI67 protein',
+        # 'Ivi -Lymphovascular invasion',
+        # 'KI67 protein',
         # 'Lymphatic penetration',
         # 'M -metastases mark (TNM)',
         # 'Margin Type',
         # 'N -lymph nodes mark (TNM)',
-        'Side', 'Stage',
-        'Surgery date1', 'Surgery date2', 'Surgery date3',
-        'Surgery name1', 'Surgery name2',
+        # 'Side',
+        # 'Stage',
+        # 'Surgery date1', 'Surgery date2', 'Surgery date3',
+        'Surgery name1',
+        'Surgery name2',
         'Surgery name3',
         # 'T -Tumor mark (TNM)',
-        'er', 'pr',
-        'surgery before or after-Activity date',
+        # 'er',
+        # 'pr',
+        # 'surgery before or after-Activity date',
         #  'surgery before or after-Actual activity',
         'id-hushed_internalpatientid']
     df.drop(columns_to_drop, axis=1, inplace=True)
     df = to_number(df)
-    df = extracting_data(df)
-    df = map_data(df)
-    # df = date_process(df)
+    df = handling_features(df)
     X = df.fillna(0)
     return X
 
