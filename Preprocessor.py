@@ -1,6 +1,5 @@
-import numpy as np
 import pandas as pd
-
+import numpy as np
 from utils import BasicStage
 from utils import FormName
 from utils import MarginType
@@ -124,9 +123,13 @@ def handle_Ivi(df):
         df['Ivi -Lymphovascular invasion'].str.contains(r'extensive',
                                                         case=False, na=False),
         df['Ivi -Lymphovascular invasion'].str.contains(r'none', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'yes', case=False,
+                                                        na=False),
+        df['Ivi -Lymphovascular invasion'].str.contains(r'not', case=False,
                                                         na=False)]
 
-    choices = [-1, 1, -1, -1, -1, 1, 1, 0]
+    choices = [-1, 1, -1, -1, -1, 1, 1, 0, 1, -1]
 
     df['Ivi -Lymphovascular invasion'] = np.select(conditions, choices,
                                                    default=None)
@@ -159,6 +162,8 @@ def handle_KI_protein(df):
     df['Percent KI67 protein'] = df['Percent KI67 protein'].fillna(0).astype(
         float)
     df.drop('KI67 protein', axis=1, inplace=True)
+    mean_percent = df['Percent KI67 protein'].mean()
+    df['Percent KI67 protein'].fillna(mean_percent, inplace=True)
     return df
 
 
@@ -279,17 +284,28 @@ def to_number(df):
         'Int64')
     df['Nodes exam'] = pd.to_numeric(df['Nodes exam'], errors='coerce').astype(
         'Int64')
+    mean_nodes = int(df['Nodes exam'].mean())
+    df['Nodes exam'].fillna(mean_nodes, inplace=True)
+
     df['Positive nodes'] = pd.to_numeric(df['Positive nodes'],
                                          errors='coerce').astype(
         'Int64')
+    mean_positive_nodes = int(df['Positive nodes'].mean())
+    df['Positive nodes'].fillna(mean_positive_nodes, inplace=True)
+
     df['Surgery sum'] = pd.to_numeric(df['Surgery sum'],
                                       errors='coerce').astype(
         'Int64')
     df['Age'] = pd.to_numeric(df['Age'], errors='coerce').astype(
         float)
+    mean_age = df['Age'].mean()
+    df['Age'].fillna(mean_age, inplace=True)
+
     df['Tumor width'] = pd.to_numeric(df['Tumor width'],
                                       errors='coerce').astype(
         float)
+    mean_width = df['Tumor width'].mean()
+    df['Tumor width'].fillna(mean_width, inplace=True)
     return df
 
 
@@ -301,7 +317,7 @@ def handling_features(df: pd.DataFrame):
     df = handle_pr_er(df)
     df = handle_KI_protein(df)
     df = handle_Ivi(df)
-    df = date_process(df)
+    # df = date_process(df)
     df = create_dummies(df)
     return df
 
