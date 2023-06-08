@@ -6,7 +6,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.linear_model import Lasso
-from Preprocessor import load_data, preprocess_labels_q1
+from Preprocessor import preprocessor, preprocess_labels_q1
 
 NUM_OF_METASTASES = 10
 K = 10
@@ -29,17 +29,16 @@ def predicting_tumer_size_v1(X_train, X_test, y_train, y_test):
 
 if __name__ == '__main__':
 
-    dfX = load_data(sys.argv[1])
+    dfX = preprocessor(sys.argv[1])
     dfy = preprocess_labels_q1(sys.argv[2])
-    X, y = np.array(dfX), np.array(dfy)
-    dfy.to_csv("preprocess_label_0")
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
-    #
-    # # Q1
-    # predicting_metastases_v1(X_train, X_test, y_train, y_test)
-    #
-    # # Q2
-    # predicting_tumer_size_v1(X_train, X_test, y_train, y_test)
+    X, y = np.array(dfX)[1:, :], np.array(dfy)[1:, 1:]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+
+    # Q1
+    predicting_metastases_v1(X_train, X_test, y_train, y_test)
+
+    # Q2
+    predicting_tumer_size_v1(X_train, X_test, y_train, y_test)
 
 
 
