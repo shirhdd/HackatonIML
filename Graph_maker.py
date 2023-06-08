@@ -53,6 +53,13 @@ def make_pca():
     plt.title('10 most common Metastases groups')
     plt.show()
 
+    plt.figure(figsize=(10, 5))
+    plt.scatter(x=pd.DataFrame(X_pca).iloc[y == '[]', 0],
+                y=pd.DataFrame(X_pca).iloc[y == '[]', 1], label='[]')
+    # plt.legend()
+    plt.title('Patients with no Metastases')
+    plt.show()
+
 
 def histogram():
     y = pd.read_csv(LABEL_DATA).to_numpy()
@@ -66,7 +73,6 @@ def histogram():
     df = pd.read_csv(LABEL_DATA, keep_default_na=False)
     gold_labels = evaluate_part_0.parse_df_labels(df)
 
-    # make sure pred and gold annotate the same # of features
     enc = evaluate_part_0.Encode_Multi_Hot()
     gold_vals = gold_labels["vals"]
     enc.fit(gold_vals)
@@ -74,6 +80,7 @@ def histogram():
     gold_multi_hot = np.array([enc.enc(val) for val in gold_vals])
     df = pd.DataFrame(gold_multi_hot, columns=enc.ind_to_label.values())
     df = df.sum(axis=0).reset_index(name='Count')
+    df = df.sort_values(by=['Count'], ascending=False)
     px.bar(df, x='index', y='Count', title='Histogram showing the number of patients for each Metastases').show()
 
 if __name__ == '__main__':
