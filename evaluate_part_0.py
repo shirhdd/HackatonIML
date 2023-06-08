@@ -25,16 +25,15 @@ import itertools
 import numpy as np
 from sklearn.metrics import f1_score
 
-
 # Local imports
 from main import run_predict_q1
-
 
 # ----
 TRAIN_X_FILE = 'train_sets/train.csv'
 TRAIN_Y_FILE = 'train_sets/train_label_0.csv'
 TEST_X_FILE = 'tests_sets/test1.csv'
 TEST_Y_FILE = 'tests_sets/test1_label_0.csv'
+
 
 def flatten(ls):
     """
@@ -92,35 +91,33 @@ def parse_df_labels(df):
 
 
 if __name__ == "__main__":
-    pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE)
-    gold_fn = Path(TEST_Y_FILE)
+    for param in range(20, 80, 10):
+        pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE, param)
+        gold_fn = Path(TEST_Y_FILE)
 
-    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
-    pred_labels = parse_df_labels(pred.astype(str))
+        gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
+        pred_labels = parse_df_labels(pred.astype(str))
 
-    # make sure that the same label is annotated in pred and gold
-    assert (gold_labels["resp"] == pred_labels["resp"])
-    enc = Encode_Multi_Hot()
-    gold_vals = gold_labels["vals"]
-    pred_vals = pred_labels["vals"]
+        # make sure that the same label is annotated in pred and gold
+        assert (gold_labels["resp"] == pred_labels["resp"])
+        enc = Encode_Multi_Hot()
+        gold_vals = gold_labels["vals"]
+        pred_vals = pred_labels["vals"]
 
-    # make sure pred and gold annotate the same # of features
-    assert (len(gold_vals) == len(pred_vals))
-    enc.fit(gold_vals + pred_vals)
+        # make sure pred and gold annotate the same # of features
+        assert (len(gold_vals) == len(pred_vals))
+        enc.fit(gold_vals + pred_vals)
 
-    gold_multi_hot = np.array([enc.enc(val) for val in gold_vals])
-    pred_multi_hot = np.array([enc.enc(val) for val in pred_vals])
+        gold_multi_hot = np.array([enc.enc(val) for val in gold_vals])
+        pred_multi_hot = np.array([enc.enc(val) for val in pred_vals])
 
-    # Print micro-macro f1
-    macro_f1 = f1_score(y_true=gold_multi_hot,
-                        y_pred=pred_multi_hot,
-                        average="macro")
+        # Print micro-macro f1
+        macro_f1 = f1_score(y_true=gold_multi_hot,
+                            y_pred=pred_multi_hot,
+                            average="macro")
 
-    micro_f1 = f1_score(y_true=gold_multi_hot,
-                        y_pred=pred_multi_hot,
-                        average="micro")
+        micro_f1 = f1_score(y_true=gold_multi_hot,
+                            y_pred=pred_multi_hot,
+                            average="micro")
 
-    print(f"Micro f1 = {micro_f1} \n Macro f1 = {macro_f1}")
-
-    # End
-    logging.info("DONE")
+        print(f"param = {param}, Micro f1 = {micro_f1}, Macro f1 = {macro_f1} \n")

@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn import ensemble
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.multioutput import MultiOutputClassifier
@@ -85,11 +87,14 @@ def indicator_matrix_to_lists(dummies, col_names) -> pd.DataFrame:
     # return dummies['אבחנה-Location of distal metastases']
 
 
-def predicting_metastases_v1(X_train, X_test, y_train, col_names):
-    random_forest = ensemble.RandomForestClassifier(max_depth=10, random_state=42, class_weight="balanced")
-    classifier = OneVsRestClassifier(estimator=random_forest)
+def predicting_metastases_v1(X_train, X_test, y_train, col_names, param):
+    # algo = ensemble.RandomForestClassifier(max_depth=param, random_state=42, class_weight="balanced")
+    algo = ensemble.AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), n_estimators=param)
+    classifier = OneVsRestClassifier(estimator=algo)
     classifier.fit(X_train, y_train)
     pred = classifier.predict(X_test)
+
+
 
     return indicator_matrix_to_lists(pred, col_names)
 
@@ -122,11 +127,11 @@ def predicting_tumer_size_v1(X_train, X_test, y_train, y_test):
     lasso.fit(X_train, y_train)
 
 
-def run_predict_q1(X_train_file, y_train_file, X_test_file):
+def run_predict_q1(X_train_file, y_train_file, X_test_file, param):
     X_train, y_train, X_test, col_names = load_files_to_array(X_train_file, y_train_file, X_test_file)
 
     # Q1
-    return predicting_metastases_v1(X_train, X_test, y_train, col_names)
+    return predicting_metastases_v1(X_train, X_test, y_train, col_names, param)
 
 
 if __name__ == '__main__':
