@@ -85,40 +85,6 @@ surgery_bef_aft_activity_map = {
     'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_in_surgery.value,
 }
 
-side_map = {'nan': Side.none,
-            'שמאל': Side.left,
-            'ימין': Side.right,
-            'דו צדדי': Side.both}
-margin_type_map = {'ללא': MarginType.without,
-                   'נקיים': MarginType.clean,
-                   'נגועים': MarginType.infected}
-basic_stage_map = {'c - Clinical': BasicStage.clinical,
-                   'p - Pathological': BasicStage.pathological,
-                   'Null': None,
-                   'r - Reccurent': BasicStage.recurrent}
-form_name_map = {'דיווח סיעודי': FormName.nursing_report,
-                 'ביקור במרפאה': FormName.visit_the_clinic,
-                 'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
-                 'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic,
-                 'אנמנזה סיעודית': FormName.nursing_anamnesis,
-                 'אנמנזה רפואית': FormName.medical_anamnesis,
-                 'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic,
-                 'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis,
-                 'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis}
-surgery_bef_aft_activity_map = {'nan': None,
-                                'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring,
-                                'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands,
-                                'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands,
-                                'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy,
-                                'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access,
-                                'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית'
-                                '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam,
-                                'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown,
-                                'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands,
-                                'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands,
-                                'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery}
-COLUMN_NAMES = ['ADR-Adrenals', 'BON-Bones', 'BRA-Brain', 'HEP-Hepatic', 'LYM-Lymphnodes', 'MAR-BoneMarrow',
-                'OTH-Other', 'PER-Peritoneum', 'PLE-Pleura', 'PUL-Pulmonary',  'SKI-Skin']
 
 def load_data(filename: str):
     df = pd.read_csv(filename, dtype={
@@ -297,14 +263,9 @@ def preprocess_labels_q1(file_path):
     df = pd.read_csv(file_path)
     myList = []
     for strings in df[A]:
-        labels = strings[2:-2].replace("'", "").split(", ")
-        if labels != ['']:
-            myList.append(labels)
-        else:
-            myList.append('[]')
+        myList.append(strings[2:-2].replace(" ", "").replace("'", "").split(","))
     df = pd.DataFrame({'labels': myList})
-    df = pd.get_dummies(df.explode(column='labels'), prefix="", prefix_sep="").groupby(level=0).sum()
-    return df
+    return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
 
 
 def to_number(df):
