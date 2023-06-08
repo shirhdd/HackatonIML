@@ -1,27 +1,19 @@
-import sys
 import itertools
+import sys
 from typing import List
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
 from sklearn import ensemble
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.multioutput import MultiOutputClassifier
 from sklearn.linear_model import Lasso
-from Preprocessor import preprocessor, preprocess_labels_q1, load_data
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import f1_score
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.linear_model import RidgeClassifier
-from sklearn.cluster import KMeans
-from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.multiclass import OneVsRestClassifier
 
-REGRESSION = "1"
+from Preprocessor import load_data
+from Preprocessor import preprocessor
 
 CLASSIFICATION = "0"
+REGRESSION = "1"
 
 PREDICTION_TYPE = 1
 X_TRAIN_FILE = 2
@@ -181,20 +173,11 @@ def predicting_tumer_size_v1(X_train, X_test, y_train):
 #         loss[i] = mean_squared_error(y_true=gold_vals, y_pred=pred)
 #
 #     print(f"min loss: {np.min(loss)}, argmin: {alphas[np.argmin(loss)]}")
-def run_predict_q1(X_train_file, y_train_file, X_test_file, param):
-    X_train, y_train, X_test, col_names = load_files_to_array(X_train_file, y_train_file, X_test_file)
-
-    # Q1
-    return predicting_metastases_v1(X_train, X_test, y_train, col_names, param)
 
 
 if __name__ == '__main__':
-    # TODO: VALIDATE ARGS
 
     X_train, y_train, X_test, col_names = load_files_to_array(sys.argv)
-    #  TODO: remove - its for debugging
-    # train_after_parse = indicator_matrix_to_lists(y_test, col_names)
-    # pd.DataFrame(train_after_parse).to_csv("tree_pred.csv", index=False)
 
     # Q1
     if (sys.argv[PREDICTION_TYPE] == CLASSIFICATION):
