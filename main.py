@@ -9,6 +9,11 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.linear_model import Lasso
 from Preprocessor import preprocessor, preprocess_labels_q1, load_data
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import f1_score
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.linear_model import RidgeClassifier
+from sklearn.cluster import KMeans
+from sklearn.gaussian_process import GaussianProcessClassifier
 
 import itertools
 
@@ -87,14 +92,19 @@ def indicator_matrix_to_lists(dummies, col_names) -> pd.DataFrame:
     # return dummies['אבחנה-Location of distal metastases']
 
 
+def loss_func(y_pred, y_true):
+    return f1_score(y_true=y_true, y_pred=y_pred, average="macro")
+
+
 def predicting_metastases_v1(X_train, X_test, y_train, col_names, param):
-    # algo = ensemble.RandomForestClassifier(max_depth=param, random_state=42, class_weight="balanced")
-    algo = ensemble.AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), n_estimators=param)
+    algo = ensemble.RandomForestClassifier(max_depth=param, random_state=42, class_weight="balanced")
+    # algo = ensemble.AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), n_estimators=param)
+    # algo = DecisionTreeClassifier(max_depth=param)
+    # algo = RidgeClassifier(alpha=param)
+    algo = GaussianProcessClassifier(max_iter_predict=param)
     classifier = OneVsRestClassifier(estimator=algo)
     classifier.fit(X_train, y_train)
     pred = classifier.predict(X_test)
-
-
 
     return indicator_matrix_to_lists(pred, col_names)
 

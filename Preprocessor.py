@@ -217,6 +217,11 @@ def handle_Her2(df):
     return df
 
 
+def count_surgeries(df: pd.DataFrame) -> pd.DataFrame:
+    new_column = df.loc[:, ['Surgery name1', 'Surgery name2', 'Surgery name3']].count(axis=1)
+    df['num_of_surgeries'] = new_column
+    return df
+
 def create_dummies(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Side'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Margin Type'])
@@ -233,8 +238,7 @@ def extracting_data(df: pd.DataFrame):
     df['M -metastases mark (TNM)'] = df[
         'M -metastases mark (TNM)'].str.extract(
         r'M(.)', expand=False)
-    df.loc[df[
-               'M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
+    df.loc[df['M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
     df['N -lymph nodes mark (TNM)'] = df[
         'N -lymph nodes mark (TNM)'].str.extract(
         r'N(\d)', expand=False).replace(np.nan, 0).astype(int)
@@ -242,7 +246,9 @@ def extracting_data(df: pd.DataFrame):
         r'T(\d)', expand=False).replace(np.nan, 0).astype(int)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
         r'L(.)', expand=False)
+    df['has penetration'] = 0
     df.loc[df['Lymphatic penetration'] == 'I', 'Lymphatic penetration'] = 3
+    df.loc[df['Lymphatic penetration'] == 3, 'has penetration'] = 1
     df['User Name'] = df['User Name'].str.extract(
         r'(\d+)_Onco', expand=False).replace(np.nan, 0).astype(int)
     return df
@@ -253,7 +259,8 @@ def map_data(df):
     df['Form name'] = df['Form name'].map(form_name_map)
     df['Basic stage'] = df['Basic stage'].map(basic_stage_map)
     df['Margin Type'] = df['Margin Type'].map(margin_type_map)
-    df['surgery before or after-Actual activity'] = df['surgery before or after-Actual activity'].map(surgery_bef_aft_activity_map)
+    df['surgery before or after-Actual activity'] = df['surgery before or after-Actual activity'].map(
+        surgery_bef_aft_activity_map)
     return df
 
 
@@ -348,9 +355,9 @@ def preprocessor(df: pd.DataFrame):
         'surgery before or after-Activity date',
         #  'surgery before or after-Actual activity',
         'id-hushed_internalpatientid']
-    df.drop(columns_to_drop, axis=1, inplace=True)
     df = to_number(df)
     df = handling_features(df)
+    df.drop(columns_to_drop, axis=1, inplace=True)
     X = df.fillna(0)
     return X
 
