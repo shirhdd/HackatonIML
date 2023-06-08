@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from utils import BasicStage
 from utils import FormName
 from utils import MarginType
@@ -43,46 +44,44 @@ stage_map_types = {
 }
 
 side_map = {
-    'nan': Side.none.value,
-    'שמאל': Side.left.value,
-    'ימין': Side.right.value,
-    'דו צדדי': Side.both.value,
+    np.nan: Side.none,
+    'שמאל': Side.left,
+    'ימין': Side.right,
+    'דו צדדי': Side.both,
 }
 margin_type_map = {
-    'ללא': MarginType.without.value,
-    'נקיים': MarginType.clean.value,
-    'נגועים': MarginType.infected.value,
+    'ללא': MarginType.without,
+    'נקיים': MarginType.clean,
+    'נגועים': MarginType.infected,
 }
 basic_stage_map = {
-    'c - Clinical': BasicStage.clinical.value,
-    'p - Pathological': BasicStage.pathological.value,
-    'Null': None,
-    'r - Reccurent': BasicStage.recurrent.value
+    'r - Reccurent': BasicStage.recurrent,
+    'c - Clinical': BasicStage.clinical,
+    'p - Pathological': BasicStage.pathological,
 }
 form_name_map = {
-    'דיווח סיעודי': FormName.nursing_report.value,
-    'ביקור במרפאה': FormName.visit_the_clinic.value,
-    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report.value,
-    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic.value,
-    'אנמנזה סיעודית': FormName.nursing_anamnesis.value,
-    'אנמנזה רפואית': FormName.medical_anamnesis.value,
-    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic.value,
-    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis.value,
-    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis.value,
+    'דיווח סיעודי': FormName.nursing_report,
+    'ביקור במרפאה': FormName.visit_the_clinic,
+    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
+    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic,
+    'אנמנזה סיעודית': FormName.nursing_anamnesis,
+    'אנמנזה רפואית': FormName.medical_anamnesis,
+    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic,
+    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis,
+    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis,
 }
 surgery_bef_aft_activity_map = {
-    'nan': None,
-    'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring.value,
-    'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands.value,
-    'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands.value,
-    'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy.value,
-    'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access.value,
-    '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam.value,
-    'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown.value,
-    'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands.value,
-    'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands.value,
-    'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery.value,
-    'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_in_surgery.value,
+    # 'nan': None,
+    'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands,
+    'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy,
+    'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access,
+    'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands,
+    'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית (intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam,
+    'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown,
+    'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands,
+    'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery,
+    'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring,
+    'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands,
 }
 
 
@@ -213,6 +212,15 @@ def handle_Her2(df):
     return df
 
 
+def create_dummies(df: pd.DataFrame) -> pd.DataFrame:
+    df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Side'])
+    df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Margin Type'])
+    df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Basic stage'])
+    df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Form name'])
+    df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['surgery before or after-Actual activity'])
+    return df
+
+
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
         r'G(.)', expand=False)
@@ -240,9 +248,7 @@ def map_data(df):
     df['Form name'] = df['Form name'].map(form_name_map)
     df['Basic stage'] = df['Basic stage'].map(basic_stage_map)
     df['Margin Type'] = df['Margin Type'].map(margin_type_map)
-    df['surgery before or after-Actual activity'] = df[
-        'surgery before or after-Actual activity'].map(
-        surgery_bef_aft_activity_map)
+    df['surgery before or after-Actual activity'] = df['surgery before or after-Actual activity'].map(surgery_bef_aft_activity_map)
     return df
 
 
@@ -296,6 +302,7 @@ def handling_features(df: pd.DataFrame):
     df = handle_KI_protein(df)
     df = handle_Ivi(df)
     df = date_process(df)
+    df = create_dummies(df)
     return df
 
 

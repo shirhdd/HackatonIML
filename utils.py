@@ -24,7 +24,6 @@ class SurgeryActivity(enum.Enum):
     removal_of_lymph_glands = 8
     removal_armpit_glands = 9
     mastectomy_breast_surgery = 10
-    chiro_breast_lumpectomy_glandular_radiation_in_surgery = 11
 
 
 class BasicStage(enum.Enum):
