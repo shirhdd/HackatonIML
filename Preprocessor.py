@@ -1,89 +1,61 @@
 import pandas as pd
-import enum
 
+from utils import BasicStage
+from utils import FormName
+from utils import MarginType
+from utils import Side
+from utils import SurgeryActivity
 
-class FormName(enum.Enum):
-    nursing_report = 1
-    visit_the_clinic = 2
-    assessment_symptoms_and_nursing_report = 3
-    visit_the_radiation_clinic = 4
-    nursing_anamnesis = 5
-    medical_anamnesis = 6
-    visit_the_hemato_oncology_clinic = 7
-    short_nursing_anamnesis = 8
-    hemato_oncological_medical_anamnesis = 9
-
-
-class SurgeryActivity(enum.Enum):
-    hero_lup_hot_ring = 1,
-    chiro_breast_lymphectomy_glands = 2,
-    chiro_breast_mastectomy_glands = 3,
-    surgery_breast_lymphectomy = 4,
-    breast_resection_with_small_gland_access = 5,
-    chiro_breast_lumpectomy_glandular_radiation_intrabeam = 6,
-    breast_resection_small_access_through_the_crown = 7,
-    removal_of_lymph_glands = 8,
-    removal_armpit_glands = 9
-    mastectomy_breast_surgery = 10
-
-
-class BasicStage(enum.Enum):
-    clinical = 1,
-    pathological = 2,
-    recurrent = 3
-
-
-class MarginType(enum.Enum):
-    without = 0,
-    clean = 1,
-    infected = 2
-
-
-class Side(enum.Enum):
-    none = 0,
-    left = 1,
-    right = 2,
-    both = 3
-
-
-side_map = {'nan': Side.none,
-            'שמאל': Side.left,
-            'ימין': Side.right,
-            'דו צדדי': Side.both}
-margin_type_map = {'ללא': MarginType.without,
-                   'נקיים': MarginType.clean,
-                   'נגועים': MarginType.infected}
-
-basic_stage_map = {'c - Clinical': BasicStage.clinical,
-                   'p - Pathological': BasicStage.pathological,
-                   'Null': None,
-                   'r - Reccurent': BasicStage.recurrent}
-
-form_name_map = {'דיווח סיעודי': FormName.nursing_report,
-                 'ביקור במרפאה': FormName.visit_the_clinic,
-                 'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
-                 'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic,
-                 'אנמנזה סיעודית': FormName.nursing_anamnesis,
-                 'אנמנזה רפואית': FormName.medical_anamnesis,
-                 'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic,
-                 'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis,
-                 'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis}
-surgery_bef_aft_activity_map = {'nan': None,
-                                'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring,
-                                'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands,
-                                'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands,
-                                'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy,
-                                'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access,
-                                'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית'
-                                '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam,
-                                'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown,
-                                'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands,
-                                'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands,
-                                'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery}
+side_map = {
+    'nan': Side.none.value,
+    'שמאל': Side.left.value,
+    'ימין': Side.right.value,
+    'דו צדדי': Side.both.value,
+}
+margin_type_map = {
+    'ללא': MarginType.without.value,
+    'נקיים': MarginType.clean.value,
+    'נגועים': MarginType.infected.value,
+}
+basic_stage_map = {
+    'c - Clinical': BasicStage.clinical.value,
+    'p - Pathological': BasicStage.pathological.value,
+    'Null': None,
+    'r - Reccurent': BasicStage.recurrent.value
+}
+form_name_map = {
+    'דיווח סיעודי': FormName.nursing_report.value,
+    'ביקור במרפאה': FormName.visit_the_clinic.value,
+    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report.value,
+    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic.value,
+    'אנמנזה סיעודית': FormName.nursing_anamnesis.value,
+    'אנמנזה רפואית': FormName.medical_anamnesis.value,
+    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic.value,
+    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis.value,
+    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis.value,
+}
+surgery_bef_aft_activity_map = {
+    'nan': None,
+    'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring.value,
+    'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands.value,
+    'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands.value,
+    'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy.value,
+    'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access.value,
+    '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam.value,
+    'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown.value,
+    'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands.value,
+    'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands.value,
+    'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery.value,
+    'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_in_surgery.value,
+}
 
 
 def load_data(filename: str):
-    df = pd.read_csv(filename, dtype=str)
+    df = pd.read_csv(filename, dtype={
+        'אבחנה-Surgery date3': str,
+        'אבחנה-Surgery name3': str,
+        'אבחנה-Ivi -Lymphovascular invasion': str
+    })
     df.columns = ['Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
                   'Diagnosis date', 'Her2', 'Histological diagnosis',
                   'Histopatological degree', 'Ivi -Lymphovascular invasion',
@@ -102,21 +74,25 @@ def load_data(filename: str):
 
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
-        r'(G.))', expand=False)
+        r'G(.)', expand=False)
+    df.loc[df['Histopatological degree'] == 'X', 'Histopatological degree'] = 0
     # df['Stage'] = df['Stage'].str.extract(
     #     r'(Stage.+))', expand=False) //TODO: there are values with nan/LA/not yet
     df['M -metastases mark (TNM)'] = df[
         'M -metastases mark (TNM)'].str.extract(
-        r'(M.)', expand=False)
+        r'M(.)', expand=False)
+    df.loc[df[
+               'M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
     df['N -lymph nodes mark (TNM)'] = df[
         'N -lymph nodes mark (TNM)'].str.extract(
-        r'(N.)', expand=False)
+        r'N(.)', expand=False)
     df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
-        r'(T.)', expand=False)
+        r'T(.)', expand=False)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
-        r'(L.)', expand=False)  # TODO: there is rest of the sentence to cut
+        r'L(.)', expand=False)
+    df.loc[df['Lymphatic penetration'] == 'I', 'Lymphatic penetration'] = 3
     df['User Name'] = df['User Name'].str.extract(
-        r'(\d+_Onco)', expand=False)
+        r'(\d+)_Onco', expand=False)
     return df
 
 
@@ -127,7 +103,6 @@ def map_data(df):
     df['surgery before or after-Actual activity'] = df[
         'surgery before or after-Actual activity'].map(
         surgery_bef_aft_activity_map)
-
     return df
 
 
@@ -154,7 +129,7 @@ def preprocess_labels_q1(file_path):
     return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
 
 
-def toNumber(df):
+def to_number(df):
     df['Hospital'] = pd.to_numeric(df['Hospital'], errors='coerce').astype(
         'Int64')
     df['Nodes exam'] = pd.to_numeric(df['Nodes exam'], errors='coerce').astype(
@@ -174,26 +149,37 @@ def toNumber(df):
 
 
 def preprocessor(df: pd.DataFrame):
-    columns_to_drop = ['Form name', 'User Name', 'Basic stage',
-                       'Diagnosis date', 'Her2', 'Histological diagnosis',
-                       'Histopatological degree',
-                       'Ivi -Lymphovascular invasion',
-                       'KI67 protein', 'Lymphatic penetration',
-                       'M -metastases mark (TNM)', 'Margin Type',
-                       'N -lymph nodes mark (TNM)',
-                       'Side', 'Stage', 'Surgery date1', 'Surgery date2',
-                       'Surgery date3', 'Surgery name1', 'Surgery name2',
-                       'Surgery name3', 'T -Tumor mark (TNM)', 'er', 'pr',
-                       'surgery before or after-Activity date',
-                       'surgery before or after-Actual activity',
-                       'id-hushed_internalpatientid']
+    columns_to_drop = [  # 'Form name',
+        # 'User Name',
+        # 'Basic stage',
+        'Diagnosis date',
+        'Her2', 'Histological diagnosis',
+        # 'Histopatological degree',
+        'Ivi -Lymphovascular invasion',
+        'KI67 protein',
+        # 'Lymphatic penetration',
+        # 'M -metastases mark (TNM)',
+        # 'Margin Type',
+        # 'N -lymph nodes mark (TNM)',
+        'Side', 'Stage',
+        'Surgery date1', 'Surgery date2', 'Surgery date3',
+        'Surgery name1', 'Surgery name2',
+        'Surgery name3',
+        # 'T -Tumor mark (TNM)',
+        'er', 'pr',
+        'surgery before or after-Activity date',
+        #  'surgery before or after-Actual activity',
+        'id-hushed_internalpatientid']
     df.drop(columns_to_drop, axis=1, inplace=True)
-    df = toNumber(df)
+    df = to_number(df)
+    df = extracting_data(df)
+    df = map_data(df)
+    # df = date_process(df)
     X = df.fillna(0)
     return X
 
 
-def main(filename: str):
+def load_and_preproc(filename: str):
     df = load_data(filename)
     # if not test:
     # fit
@@ -201,4 +187,4 @@ def main(filename: str):
 
 
 if __name__ == '__main__':
-    print(main("train_sets/train.csv"))
+    print(load_and_preproc("train_sets/train.csv"))
