@@ -1,42 +1,61 @@
 import pandas as pd
-from utils import Side, MarginType, BasicStage, FormName, SurgeryActivity
 
-side_map = {'nan': Side.none,
-            'שמאל': Side.left,
-            'ימין': Side.right,
-            'דו צדדי': Side.both}
-margin_type_map = {'ללא': MarginType.without,
-                   'נקיים': MarginType.clean,
-                   'נגועים': MarginType.infected}
-basic_stage_map = {'c - Clinical': BasicStage.clinical,
-                   'p - Pathological': BasicStage.pathological,
-                   'Null': None,
-                   'r - Reccurent': BasicStage.recurrent}
-form_name_map = {'דיווח סיעודי': FormName.nursing_report,
-                 'ביקור במרפאה': FormName.visit_the_clinic,
-                 'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
-                 'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic,
-                 'אנמנזה סיעודית': FormName.nursing_anamnesis,
-                 'אנמנזה רפואית': FormName.medical_anamnesis,
-                 'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic,
-                 'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis,
-                 'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis}
-surgery_bef_aft_activity_map = {'nan': None,
-                                'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring,
-                                'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands,
-                                'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands,
-                                'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy,
-                                'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access,
-                                'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית'
-                                '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam,
-                                'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown,
-                                'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands,
-                                'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands,
-                                'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery}
+from utils import BasicStage
+from utils import FormName
+from utils import MarginType
+from utils import Side
+from utils import SurgeryActivity
+
+side_map = {
+    'nan': Side.none.value,
+    'שמאל': Side.left.value,
+    'ימין': Side.right.value,
+    'דו צדדי': Side.both.value,
+}
+margin_type_map = {
+    'ללא': MarginType.without.value,
+    'נקיים': MarginType.clean.value,
+    'נגועים': MarginType.infected.value,
+}
+basic_stage_map = {
+    'c - Clinical': BasicStage.clinical.value,
+    'p - Pathological': BasicStage.pathological.value,
+    'Null': None,
+    'r - Reccurent': BasicStage.recurrent.value
+}
+form_name_map = {
+    'דיווח סיעודי': FormName.nursing_report.value,
+    'ביקור במרפאה': FormName.visit_the_clinic.value,
+    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report.value,
+    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic.value,
+    'אנמנזה סיעודית': FormName.nursing_anamnesis.value,
+    'אנמנזה רפואית': FormName.medical_anamnesis.value,
+    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic.value,
+    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis.value,
+    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis.value,
+}
+surgery_bef_aft_activity_map = {
+    'nan': None,
+    'כיר-לאפ-הוצ טבעת/שנוי מי': SurgeryActivity.hero_lup_hot_ring.value,
+    'כירו-שד-למפקטומי+בלוטות': SurgeryActivity.chiro_breast_lymphectomy_glands.value,
+    'כירו-שד-מסטקטומי+בלוטות': SurgeryActivity.chiro_breast_mastectomy_glands.value,
+    'כירורגיה-שד למפקטומי': SurgeryActivity.surgery_breast_lymphectomy.value,
+    'שד-כריתה בגישה זעירה+בלוטות': SurgeryActivity.breast_resection_with_small_gland_access.value,
+    '(intrabeam)': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_intrabeam.value,
+    'שד-כריתה בגישה זעירה דרך העטרה': SurgeryActivity.breast_resection_small_access_through_the_crown.value,
+    'כירור-הוצאת בלוטות לימפה': SurgeryActivity.removal_of_lymph_glands.value,
+    'כיר-שד-הוצ.בלוטות בית שח': SurgeryActivity.removal_armpit_glands.value,
+    'כירורגיה-שד מסטקטומי': SurgeryActivity.mastectomy_breast_surgery.value,
+    'כירו-שד-למפקטומי+בלוטות+קרינה תוך ניתוחית': SurgeryActivity.chiro_breast_lumpectomy_glandular_radiation_in_surgery.value,
+}
 
 
 def load_data(filename: str):
-    df = pd.read_csv(filename)
+    df = pd.read_csv(filename, dtype={
+        'אבחנה-Surgery date3': str,
+        'אבחנה-Surgery name3': str,
+        'אבחנה-Ivi -Lymphovascular invasion': str
+    })
     df.columns = ['Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
                   'Diagnosis date', 'Her2', 'Histological diagnosis',
                   'Histopatological degree', 'Ivi -Lymphovascular invasion',
