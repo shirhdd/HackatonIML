@@ -27,6 +27,38 @@ class SurgeryActivity(enum.Enum):
     mastectomy_breast_surgery = 10
 
 
+class BasicStage(enum.Enum):
+    clinical = 1,
+    pathological = 2,
+    recurrent = 3
+
+
+class MarginType(enum.Enum):
+    without = 0,
+    clean = 1,
+    infected = 2
+
+
+class Side(enum.Enum):
+    none = 0,
+    left = 1,
+    right = 2,
+    both = 3
+
+
+side_map = {'nan': Side.none,
+            'שמאל': Side.left,
+            'ימין': Side.right,
+            'דו צדדי': Side.both}
+margin_type_map = {'ללא': MarginType.without,
+                   'נקיים': MarginType.clean,
+                   'נגועים': MarginType.infected}
+
+basic_stage_map = {'c - Clinical': BasicStage.clinical,
+                   'p - Pathological': BasicStage.pathological,
+                   'Null': None,
+                   'r - Reccurent': BasicStage.recurrent}
+
 form_name_map = {'דיווח סיעודי': FormName.nursing_report,
                  'ביקור במרפאה': FormName.visit_the_clinic,
                  'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
@@ -71,8 +103,8 @@ def load_data(filename: str):
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
         r'(G.))', expand=False)
-    df['Stage'] = df['Stage'].str.extract(
-        r'(Stage.+))', expand=False)
+    # df['Stage'] = df['Stage'].str.extract(
+    #     r'(Stage.+))', expand=False) //TODO: there are values with nan/LA/not yet
     df['M -metastases mark (TNM)'] = df[
         'M -metastases mark (TNM)'].str.extract(
         r'(M.)', expand=False)
@@ -83,20 +115,32 @@ def extracting_data(df: pd.DataFrame):
         r'(T.)', expand=False)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
         r'(L.)', expand=False)  # TODO: there is rest of the sentence to cut
+    df['User Name'] = df['User Name'].str.extract(
+        r'(\d+_Onco)', expand=False)
     return df
 
 
 def map_data(df):
     df['Form name'] = df['Form name'].map(form_name_map)
+    df['Basic stage'] = df['Basic stage'].map(basic_stage_map)
+    df['Margin Type'] = df['Margin Type'].map(margin_type_map)
     df['surgery before or after-Actual activity'] = df[
         'surgery before or after-Actual activity'].map(
         surgery_bef_aft_activity_map)
+
     return df
 
 
 def date_process(df):
     date_columns = ['surgery before or after-Activity date', 'Surgery date3',
                     'Surgery date2', 'Surgery date1', 'Diagnosis date']
+    for date_type in date_columns:
+        df[date_type] = pd.to_datetime(df[date_type], errors="coerce",
+                                       infer_datetime_format=True)
+    diag_to_surg = (df['Diagnosis date'] - df['Surgery date1']).dt.days
+    df = df[~(diag_to_surg < 0)]
+    df["diagnoses_to_surgery_days"] = diag_to_surg[diag_to_surg > 0]
+    return df
 
 
 def preprocess_labels_q1(file_path):
@@ -104,13 +148,30 @@ def preprocess_labels_q1(file_path):
     df = pd.read_csv(file_path)
     myList = []
     for strings in df[A]:
-        myList.append(strings[2:-2].replace(" ", "").replace("'", "").split(","))
+        myList.append(
+            strings[2:-2].replace(" ", "").replace("'", "").split(","))
     df = pd.DataFrame({'labels': myList})
     return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
 
 
+def toNumber(df):
+    df['Hospital'] = pd.to_numeric(df['Hospital'], errors='coerce').astype(
+        'Int64')
+    df['Nodes exam'] = pd.to_numeric(df['Nodes exam'], errors='coerce').astype(
+        'Int64')
+    df['Positive nodes'] = pd.to_numeric(df['Positive nodes'],
+                                         errors='coerce').astype(
+        'Int64')
+    df['Surgery sum'] = pd.to_numeric(df['Surgery sum'],
+                                      errors='coerce').astype(
+        'Int64')
+    df['Age'] = pd.to_numeric(df['Age'], errors='coerce').astype(
+        float)
+
+    return df
+
+
 def preprocessor(df: pd.DataFrame):
-    # TODO: check valid date for the 5 dates from the columns
     columns_to_drop = ['Form name', 'User Name', 'Basic stage',
                        'Diagnosis date', 'Her2', 'Histological diagnosis',
                        'Histopatological degree',
@@ -125,10 +186,9 @@ def preprocessor(df: pd.DataFrame):
                        'surgery before or after-Actual activity',
                        'id-hushed_internalpatientid']
     df.drop(columns_to_drop, axis=1, inplace=True)
+    df = toNumber(df)
     X = df.fillna(0)
     return X
-
-
 
 
 def main(filename: str):
@@ -139,4 +199,4 @@ def main(filename: str):
 
 
 if __name__ == '__main__':
-    print(main("given_sets/train.feats.csv"))
+    print(main("train_sets/train.csv"))
