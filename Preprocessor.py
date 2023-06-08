@@ -8,12 +8,10 @@ side_map = {'nan': Side.none,
 margin_type_map = {'ללא': MarginType.without,
                    'נקיים': MarginType.clean,
                    'נגועים': MarginType.infected}
-
 basic_stage_map = {'c - Clinical': BasicStage.clinical,
                    'p - Pathological': BasicStage.pathological,
                    'Null': None,
                    'r - Reccurent': BasicStage.recurrent}
-
 form_name_map = {'דיווח סיעודי': FormName.nursing_report,
                  'ביקור במרפאה': FormName.visit_the_clinic,
                  'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
@@ -57,19 +55,23 @@ def load_data(filename: str):
 
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
-        r'G(.))', expand=False)
+        r'G(.)', expand=False)
+    df.loc[df['Histopatological degree'] == 'X', 'Histopatological degree'] = 0
     # df['Stage'] = df['Stage'].str.extract(
     #     r'(Stage.+))', expand=False) //TODO: there are values with nan/LA/not yet
     df['M -metastases mark (TNM)'] = df[
         'M -metastases mark (TNM)'].str.extract(
         r'M(.)', expand=False)
+    df.loc[df[
+               'M -metastases mark (TNM)'] == 'X', 'M -metastases mark (TNM)'] = 2  # cannot be measured
     df['N -lymph nodes mark (TNM)'] = df[
         'N -lymph nodes mark (TNM)'].str.extract(
         r'N(.)', expand=False)
     df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
         r'T(.)', expand=False)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
-        r'L(.)', expand=False)  # TODO: there is rest of the sentence to cut
+        r'L(.)', expand=False)
+    df.loc[df['Lymphatic penetration'] == 'I', 'Lymphatic penetration'] = 3
     df['User Name'] = df['User Name'].str.extract(
         r'(\d+)_Onco', expand=False)
     return df
@@ -82,7 +84,6 @@ def map_data(df):
     df['surgery before or after-Actual activity'] = df[
         'surgery before or after-Actual activity'].map(
         surgery_bef_aft_activity_map)
-
     return df
 
 
@@ -109,7 +110,7 @@ def preprocess_labels_q1(file_path):
     return pd.get_dummies(df.explode(column='labels')).groupby(level=0).sum()
 
 
-def toNumber(df):
+def to_number(df):
     df['Hospital'] = pd.to_numeric(df['Hospital'], errors='coerce').astype(
         'Int64')
     df['Nodes exam'] = pd.to_numeric(df['Nodes exam'], errors='coerce').astype(
@@ -129,21 +130,32 @@ def toNumber(df):
 
 
 def preprocessor(df: pd.DataFrame):
-    columns_to_drop = ['Form name', 'User Name', 'Basic stage',
-                       'Diagnosis date', 'Her2', 'Histological diagnosis',
-                       'Histopatological degree',
-                       'Ivi -Lymphovascular invasion',
-                       'KI67 protein', 'Lymphatic penetration',
-                       'M -metastases mark (TNM)', 'Margin Type',
-                       'N -lymph nodes mark (TNM)',
-                       'Side', 'Stage', 'Surgery date1', 'Surgery date2',
-                       'Surgery date3', 'Surgery name1', 'Surgery name2',
-                       'Surgery name3', 'T -Tumor mark (TNM)', 'er', 'pr',
-                       'surgery before or after-Activity date',
-                       'surgery before or after-Actual activity',
-                       'id-hushed_internalpatientid']
+    columns_to_drop = [  # 'Form name',
+        # 'User Name',
+        # 'Basic stage',
+        'Diagnosis date',
+        'Her2', 'Histological diagnosis',
+        # 'Histopatological degree',
+        'Ivi -Lymphovascular invasion',
+        'KI67 protein',
+        # 'Lymphatic penetration',
+        # 'M -metastases mark (TNM)',
+        # 'Margin Type',
+        # 'N -lymph nodes mark (TNM)',
+        'Side', 'Stage',
+        'Surgery date1', 'Surgery date2', 'Surgery date3',
+        'Surgery name1', 'Surgery name2',
+        'Surgery name3',
+        # 'T -Tumor mark (TNM)',
+        'er', 'pr',
+        'surgery before or after-Activity date',
+        #  'surgery before or after-Actual activity',
+        'id-hushed_internalpatientid']
     df.drop(columns_to_drop, axis=1, inplace=True)
-    df = toNumber(df)
+    df = to_number(df)
+    df = extracting_data(df)
+    df = map_data(df)
+    # df = date_process(df)
     X = df.fillna(0)
     return X
 
