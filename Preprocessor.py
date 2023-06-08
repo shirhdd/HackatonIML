@@ -1,50 +1,5 @@
 import pandas as pd
-import enum
-
-
-class FormName(enum.Enum):
-    nursing_report = 1
-    visit_the_clinic = 2
-    assessment_symptoms_and_nursing_report = 3
-    visit_the_radiation_clinic = 4
-    nursing_anamnesis = 5
-    medical_anamnesis = 6
-    visit_the_hemato_oncology_clinic = 7
-    short_nursing_anamnesis = 8
-    hemato_oncological_medical_anamnesis = 9
-
-
-class SurgeryActivity(enum.Enum):
-    hero_lup_hot_ring = 1,
-    chiro_breast_lymphectomy_glands = 2,
-    chiro_breast_mastectomy_glands = 3,
-    surgery_breast_lymphectomy = 4,
-    breast_resection_with_small_gland_access = 5,
-    chiro_breast_lumpectomy_glandular_radiation_intrabeam = 6,
-    breast_resection_small_access_through_the_crown = 7,
-    removal_of_lymph_glands = 8,
-    removal_armpit_glands = 9
-    mastectomy_breast_surgery = 10
-
-
-class BasicStage(enum.Enum):
-    clinical = 1,
-    pathological = 2,
-    recurrent = 3
-
-
-class MarginType(enum.Enum):
-    without = 0,
-    clean = 1,
-    infected = 2
-
-
-class Side(enum.Enum):
-    none = 0,
-    left = 1,
-    right = 2,
-    both = 3
-
+from utils import Side, MarginType, BasicStage, FormName, SurgeryActivity
 
 side_map = {'nan': Side.none,
             'שמאל': Side.left,
@@ -83,7 +38,7 @@ surgery_bef_aft_activity_map = {'nan': None,
 
 
 def load_data(filename: str):
-    df = pd.read_csv(filename, dtype=str)
+    df = pd.read_csv(filename)
     df.columns = ['Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
                   'Diagnosis date', 'Her2', 'Histological diagnosis',
                   'Histopatological degree', 'Ivi -Lymphovascular invasion',
@@ -102,21 +57,21 @@ def load_data(filename: str):
 
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
-        r'(G.))', expand=False)
+        r'G(.))', expand=False)
     # df['Stage'] = df['Stage'].str.extract(
     #     r'(Stage.+))', expand=False) //TODO: there are values with nan/LA/not yet
     df['M -metastases mark (TNM)'] = df[
         'M -metastases mark (TNM)'].str.extract(
-        r'(M.)', expand=False)
+        r'M(.)', expand=False)
     df['N -lymph nodes mark (TNM)'] = df[
         'N -lymph nodes mark (TNM)'].str.extract(
-        r'(N.)', expand=False)
+        r'N(.)', expand=False)
     df['T -Tumor mark (TNM)'] = df['T -Tumor mark (TNM)'].str.extract(
-        r'(T.)', expand=False)
+        r'T(.)', expand=False)
     df['Lymphatic penetration'] = df['Lymphatic penetration'].str.extract(
-        r'(L.)', expand=False)  # TODO: there is rest of the sentence to cut
+        r'L(.)', expand=False)  # TODO: there is rest of the sentence to cut
     df['User Name'] = df['User Name'].str.extract(
-        r'(\d+_Onco)', expand=False)
+        r'(\d+)_Onco', expand=False)
     return df
 
 
@@ -193,7 +148,7 @@ def preprocessor(df: pd.DataFrame):
     return X
 
 
-def main(filename: str):
+def load_and_preproc(filename: str):
     df = load_data(filename)
     # if not test:
     # fit
@@ -201,4 +156,4 @@ def main(filename: str):
 
 
 if __name__ == '__main__':
-    print(main("train_sets/train.csv"))
+    print(load_and_preproc("train_sets/train.csv"))
