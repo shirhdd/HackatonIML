@@ -236,18 +236,19 @@ def create_new_features(df: pd.DataFrame) -> pd.DataFrame:
     df["is_young"] = np.where(df["Age"] < YOUNG_AGE, 1, 0)
 
     # handle tumor volume
-    df['tumor_volume'] = df['Lymphatic penetration'] * df['Tumor width']
-
-    # Define the bin edges
-    tumor_volume_bins = [0, 5, 10, 20, float('inf')]
-
-    # Define the labels for the bins
-    labels = ['0-5', '5-10', '10-20', '20+']
-
-    # Create a new column with the bin labels based on the numeric_column values
-    df['bin_column'] = pd.cut(df['tumor_volume'], bins=tumor_volume_bins, labels=labels, right=False)
-
-    print(df['bin_column'].head())
+    # df['tumor_volume'] = df['Lymphatic penetration'] * df['Tumor width']
+    #
+    # # Define the bin edges
+    # tumor_volume_bins = [0, 5, 10, 20, float('inf')]
+    #
+    # # Define the labels for the bins
+    # labels = ['0-5', '5-10', '10-20', '20+']
+    #
+    # # Create a new column with the bin labels based on the numeric_column values
+    # df['bin_column'] = pd.cut(df['tumor_volume'], bins=tumor_volume_bins, labels=labels, right=False)
+    #
+    # print(df['bin_column'].head())
+    return df
 
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
