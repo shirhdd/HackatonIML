@@ -61,15 +61,15 @@ basic_stage_map = {
     'p - Pathological': BasicStage.pathological,
 }
 form_name_map = {
-    'דיווח סיעודי': FormName.nursing_report,
-    'ביקור במרפאה': FormName.visit_the_clinic,
-    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report,
-    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic,
-    'אנמנזה סיעודית': FormName.nursing_anamnesis,
-    'אנמנזה רפואית': FormName.medical_anamnesis,
-    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic,
-    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis,
-    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis,
+    'דיווח סיעודי': FormName.nursing_report.value,
+    'ביקור במרפאה': FormName.visit_the_clinic.value,
+    'אומדן סימפטומים ודיווח סיעודי': FormName.assessment_symptoms_and_nursing_report.value,
+    'ביקור במרפאה קרינה': FormName.visit_the_radiation_clinic.value,
+    'אנמנזה סיעודית': FormName.nursing_anamnesis.value,
+    'אנמנזה רפואית': FormName.medical_anamnesis.value,
+    'ביקור במרפאה המטו-אונקולוגית': FormName.visit_the_hemato_oncology_clinic.value,
+    'אנמנזה סיעודית קצרה': FormName.short_nursing_anamnesis.value,
+    'אנמנזה רפואית המטו-אונקולוגית': FormName.hemato_oncological_medical_anamnesis.value,
 }
 surgery_bef_aft_activity_map = {
     # 'nan': None,
@@ -228,7 +228,6 @@ def create_dummies(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Side'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Margin Type'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Basic stage'])
-    df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Form name'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['surgery before or after-Actual activity'])
     return df
 
@@ -350,7 +349,8 @@ def handling_features(df: pd.DataFrame):
 
 
 def preprocessor(df: pd.DataFrame):
-    columns_to_drop = [  # 'Form name',
+    columns_to_drop = [
+        # 'Form name',
         # 'User Name',
         # 'Basic stage',
         'Diagnosis date',

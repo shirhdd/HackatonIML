@@ -2,15 +2,15 @@ import enum
 
 
 class FormName(enum.Enum):
-    nursing_report = 1
-    visit_the_clinic = 2
-    assessment_symptoms_and_nursing_report = 3
-    visit_the_radiation_clinic = 4
-    nursing_anamnesis = 5
-    medical_anamnesis = 6
-    visit_the_hemato_oncology_clinic = 7
-    short_nursing_anamnesis = 8
-    hemato_oncological_medical_anamnesis = 9
+    visit_the_clinic = 0
+    medical_anamnesis = 1
+    short_nursing_anamnesis = 2
+    nursing_anamnesis = 3
+    assessment_symptoms_and_nursing_report = 4
+    hemato_oncological_medical_anamnesis = 5
+    visit_the_hemato_oncology_clinic = 6
+    visit_the_radiation_clinic = 7
+    nursing_report = 8
 
 
 class SurgeryActivity(enum.Enum):
