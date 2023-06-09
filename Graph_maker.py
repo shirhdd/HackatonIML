@@ -1,11 +1,9 @@
 import numpy as np
 import pandas as pd
-import sklearn
 from sklearn import decomposition
-from sklearn import datasets
-import Preprocessor
+from submission.task_2.code.hackathon_code import Preprocessor
 import plotly.express as px
-import evaluate_part_0
+from submission.task_2.code.hackathon_code import evaluate_part_0
 
 TRAIN_DATA = 'given_sets\\train.feats.csv'
 LABEL_DATA = 'given_sets\\train.labels.0.csv'

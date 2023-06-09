@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from utils import BasicStage
 from utils import FormName
 from utils import MarginType
@@ -184,12 +185,11 @@ def handle_pr_er(df):
             df[_].str.contains(r'\+', case=False, na=False),
             df[_].str.contains(r'3', case=False, na=False),
             df[_].str.contains(r'\(-\)', case=False, na=False),
-            (df[_].str.contains(r'(\d{2,})%?', case=False, na=False)) & (
-                    df[_].str.extract(r'(\d{2,})%?', expand=False).astype(
-                        float) >= 50),
-            (df[_].str.contains(r'(\d{2,})%?', case=False, na=False)) & (
-                    df[_].str.extract(r'(\d{2,})%?', expand=False).astype(
-                        float) < 50)]
+            (df[_].str.contains(r'\d{2,}%?', case=False, na=False)) &
+            (df[_].str.extract(r'(\d{2,})%?', expand=False).astype(float) >= 50),
+            (df[_].str.contains(r'\d{2,}%?', case=False, na=False)) & (
+                        df[_].str.extract(r'(\d{2,})%?', expand=False).astype(float) < 50),
+        ]
 
         choices = [-1, 1, 1, 1, -1, 1, -1]
 
@@ -224,12 +224,14 @@ def count_surgeries(df: pd.DataFrame) -> pd.DataFrame:
     df['num_of_surgeries'] = new_column
     return df
 
+
 def create_dummies(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Side'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Margin Type'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['Basic stage'])
     df = pd.get_dummies(df, prefix="", prefix_sep="", columns=['surgery before or after-Actual activity'])
     return df
+
 
 def create_new_features(df: pd.DataFrame) -> pd.DataFrame:
     df["is_young"] = np.where(df["Age"] < YOUNG_AGE, 1, 0)
@@ -248,6 +250,7 @@ def create_new_features(df: pd.DataFrame) -> pd.DataFrame:
     #
     # print(df['bin_column'].head())
     return df
+
 
 def extracting_data(df: pd.DataFrame):
     df['Histopatological degree'] = df['Histopatological degree'].str.extract(
@@ -350,12 +353,21 @@ def handling_features(df: pd.DataFrame):
 
 def preprocessor(df: pd.DataFrame):
     columns_to_drop = [
+        'Diagnosis date',
+        'Histological diagnosis',
+        'Surgery date1', 'Surgery date2', 'Surgery date3',
+        'Surgery name1',
+        'Surgery name2',
+        'Surgery name3',
+        'surgery before or after-Activity date',
+        'id-hushed_internalpatientid',
+
+        # columns to use
+
         # 'Form name',
         # 'User Name',
         # 'Basic stage',
-        'Diagnosis date',
         # 'Her2',
-        'Histological diagnosis',
         # 'Histopatological degree',
         # 'Ivi -Lymphovascular invasion',
         # 'KI67 protein',
@@ -365,16 +377,11 @@ def preprocessor(df: pd.DataFrame):
         # 'N -lymph nodes mark (TNM)',
         # 'Side',
         # 'Stage',
-        'Surgery date1', 'Surgery date2', 'Surgery date3',
-        'Surgery name1',
-        'Surgery name2',
-        'Surgery name3',
         # 'T -Tumor mark (TNM)',
         # 'er',
         # 'pr',
-        'surgery before or after-Activity date',
         #  'surgery before or after-Actual activity',
-        'id-hushed_internalpatientid']
+    ]
     df = to_number(df)
     df = handling_features(df)
     df.drop(columns_to_drop, axis=1, inplace=True)
@@ -384,10 +391,4 @@ def preprocessor(df: pd.DataFrame):
 
 def load_and_preproc(filename: str):
     df = load_data(filename)
-    # if not test:
-    # fit
     return preprocessor(df)
-
-
-if __name__ == '__main__':
-    print(load_and_preproc("train_sets/train.csv"))

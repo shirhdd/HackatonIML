@@ -1,13 +1,9 @@
 import numpy as np
 import pandas as pd
-import sklearn
-from sklearn import decomposition
-from sklearn import datasets
-import Preprocessor
 
-TRAIN_FILE_PATH = "given_sets\\train.feats.csv"
-LABEL_0_FILE_PATH = "given_sets\\train.labels.0.csv"
-LABEL_1_FILE_PATH = "given_sets\\train.labels.1.csv"
+TRAIN_FILE_PATH = "../../../../given_sets/train.feats.csv"
+LABEL_0_FILE_PATH = "../../../../given_sets/train.labels.0.csv"
+LABEL_1_FILE_PATH = "../../../../given_sets/train.labels.1.csv"
 
 
 def load_train_data():

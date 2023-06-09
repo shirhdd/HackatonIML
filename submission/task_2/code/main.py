@@ -1,4 +1,5 @@
 import itertools
+import os
 import sys
 from typing import List
 from typing import Tuple
@@ -9,9 +10,10 @@ from sklearn import ensemble
 from sklearn.linear_model import Lasso
 from sklearn.multiclass import OneVsRestClassifier
 
-from Preprocessor import load_data
-from Preprocessor import preprocessor
+from submission.task_2.code.hackathon_code.Preprocessor import load_data
+from submission.task_2.code.hackathon_code.Preprocessor import preprocessor
 
+USAGE_MSG = """Usage: <program_name> <0/1> <train features file name> <train labels file name> <predict set>"""
 CLASSIFICATION = "0"
 REGRESSION = "1"
 
@@ -111,11 +113,11 @@ def predicting_metastases_v1(X_train, X_test, y_train, col_names):
     pred = classifier.predict(X_test)
 
     pred_df = indicator_matrix_to_lists(pred, col_names)
-    pred_df.to_csv("submission/predictions/1.csv", index=False)
+    pred_df.to_csv("./task_2/predictions/1.csv", index=False)
 
 
 def classification_preprocess_y(y_file):
-    dfy_train = parse_df_labels(pd.read_csv(y_file, keep_default_na=False))
+    dfy_train = parse_df_labels(pd.read_csv(y_file, keep_default_na=False, dtype={'אבחנה-Tumor size': str}))
     enc = Encode_Multi_Hot()
     dfy_train_vals = dfy_train["vals"]
     enc.fit(dfy_train_vals)  # get all possible labels
@@ -136,6 +138,7 @@ def load_files_to_array(argv):
     # load files
     dfX_train = preprocessor(load_data(argv[X_TRAIN_FILE]))
     dfX_test = preprocessor(load_data(argv[X_TEST_FILE]))
+    dfX_test = dfX_test.reindex(columns=dfX_train.columns, fill_value=0)
 
     # get labels
     if (argv[PREDICTION_TYPE] == "0"):
@@ -153,39 +156,31 @@ def predicting_tumer_size_v1(X_train, X_test, y_train):
     lasso = Lasso(ALPHA)
     lasso.fit(X_train, y_train)
     pred = lasso.predict(X_test)
-    pd.DataFrame(pred).to_csv("submission/predictions/2.csv", header=["אבחנה-Tumor size"], index=False)
+    pd.DataFrame(pred).to_csv("./task_2/predictions/1.csv", header=["אבחנה-Tumor size"], index=False)
 
 
-# def predicting_tumer_size_v1(X_train, X_test, y_train, y_test):
-#     # TODO: remove
-#
-#     gold_fn = "tests_sets/test1_label_1.csv"
-#     gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False, dtype={'אבחנה-Tumor size': str}))
-#     gold_vals = gold_labels["vals"]
-#
-#     #min loss: 3.745278371442692, argmin: 2650.0
-#     alphas = np.linspace(2650, 3000, 40)
-#     loss = np.zeros(len(alphas))
-#     for i, a in enumerate(alphas):
-#         lasso = Ridge(alpha=a)
-#         lasso.fit(X_train, y_train)
-#         pred = lasso.predict(X_test)
-#         loss[i] = mean_squared_error(y_true=gold_vals, y_pred=pred)
-#
-#     print(f"min loss: {np.min(loss)}, argmin: {alphas[np.argmin(loss)]}")
+# TODO: remove
+def predicting_tumer_size_v1(X_train, X_test, y_train):
+    from sklearn.linear_model import Ridge
+    from sklearn.metrics import mean_squared_error
 
+    gold_fn = "tests_sets/test1_label_1.csv"
+    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False, dtype={'אבחנה-Tumor size': str}))
+    gold_vals = gold_labels["vals"]
 
-if __name__ == '__main__':
+    # min loss: 3.73851554473353, argmin: 2508.974358974359
+    alphas = np.linspace(2500, 2550, 40)
+    loss = np.zeros(len(alphas))
+    for i, a in enumerate(alphas):
+        lasso = Ridge(alpha=a)
+        lasso.fit(X_train, y_train)
+        pred = lasso.predict(X_test)
+        loss[i] = mean_squared_error(y_true=gold_vals, y_pred=pred)
 
-    X_train, y_train, X_test, col_names = load_files_to_array(sys.argv)
-
-    # Q1
-    if (sys.argv[PREDICTION_TYPE] == CLASSIFICATION):
-        predicting_metastases_v1(X_train, X_test, y_train, col_names)
-
-    # Q2
-    if (sys.argv[PREDICTION_TYPE] == REGRESSION):
-        predicting_tumer_size_v1(X_train, X_test, y_train)
+    lasso = Ridge(alpha=alphas[np.argmin(loss)])
+    lasso.fit(X_train, y_train)
+    y_pred = lasso.predict(X_test)
+    result_eval(y_pred=y_pred, y_true=np.array(gold_vals))
 
 
 def result_eval(y_pred, y_true):
@@ -201,3 +196,32 @@ def result_eval(y_pred, y_true):
     print("number of false negative ", wrong - false_positive)
     print("number of true positive ", )
     print("predicted negative ", len(pred_negative_index[0]))
+
+if __name__ == '__main__':
+    """
+    Usage:
+    <program_name> <0/1>  <train features file name> <train labels file name> <predict set>
+    """
+    if not len(sys.argv) == 5:
+        print(USAGE_MSG, file=sys.stderr)
+        exit(1)
+    if sys.argv[PREDICTION_TYPE] != CLASSIFICATION and sys.argv[PREDICTION_TYPE] != REGRESSION:
+        print(f"Usage: this argument need to be in [{CLASSIFICATION},{REGRESSION}] only \n "
+              f"0  - to run the first task \n "
+              f"1 - to run the second task", file=sys.stderr)
+        exit(1)
+    for i in range(3, 5):
+        if not os.path.exists(sys.argv[i]):
+            print(f"Usage: invalid path please enter an existing file. {sys.argv[i]} does not exist\n", file=sys.stderr)
+            exit(1)
+
+    X_train, y_train, X_test, col_names = load_files_to_array(sys.argv)
+
+    # Q1
+    if (sys.argv[PREDICTION_TYPE] == CLASSIFICATION):
+        predicting_metastases_v1(X_train, X_test, y_train, col_names)
+
+    # Q2
+    if (sys.argv[PREDICTION_TYPE] == REGRESSION):
+        predicting_tumer_size_v1(X_train, X_test, y_train)
+
