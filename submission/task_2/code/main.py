@@ -9,9 +9,11 @@ import pandas as pd
 from sklearn import ensemble
 from sklearn.linear_model import Ridge
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
-from submission.task_2.code.hackathon_code.Preprocessor import load_data
-from submission.task_2.code.hackathon_code.Preprocessor import preprocessor
+from hackathon_code.Preprocessor import load_data
+from hackathon_code.Preprocessor import preprocessor
+from submission.task_2.code.hackathon_code import pred_utils
 
 USAGE_MSG = """Usage: <program_name> <0/1> <train features file name> <train labels file name> <predict set>"""
 CLASSIFICATION = "0"
@@ -25,6 +27,8 @@ X_TEST_FILE = 4
 NUM_OF_METASTASES = 11
 K = 10
 ALPHA = 2786.44
+
+
 
 COLUMN_NAMES_SPACE = [
     'ADR - Adrenals',
@@ -107,8 +111,8 @@ def indicator_matrix_to_lists(dummies, col_names) -> pd.DataFrame:
 
 
 def predicting_metastases(X_train, X_test, y_train, col_names):
-    random_forest = ensemble.RandomForestClassifier(max_depth=10, random_state=42, class_weight="balanced")
-    classifier = OneVsRestClassifier(estimator=random_forest)
+    estimator = ensemble.AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1), n_estimators=60)
+    classifier = OneVsRestClassifier(estimator=estimator)
     classifier.fit(X_train, y_train)
     pred = classifier.predict(X_test)
 

@@ -1,11 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils import BasicStage
-from utils import FormName
-from utils import MarginType
-from utils import Side
-from utils import SurgeryActivity
+from hackathon_code.utils import *
 
 YOUNG_AGE = 40
 

@@ -28,18 +28,19 @@ from sklearn.metrics import mean_squared_error
 # Local imports
 
 
-#----
+# ----
 
 
 def parse_df_labels(df):
     """
     Return a dictionary of response name and values from df
     """
-    assert(len(df.columns) == 1)
+    assert (len(df.columns) == 1)
     resp = df.columns[0]
     ls = [float(val) for val in df[resp]]
     ret_dict = {"resp": resp, "vals": ls}
     return ret_dict
+
 
 if __name__ == "__main__":
 
@@ -51,33 +52,32 @@ if __name__ == "__main__":
     # Determine logging level
     debug = args["--debug"]
     if debug:
-        logging.basicConfig(level = logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
     else:
-        logging.basicConfig(level = logging.INFO)
+        logging.basicConfig(level=logging.INFO)
 
     # Start computation
-    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na = False))
-    pred_labels = parse_df_labels(pd.read_csv(pred_fn, keep_default_na = False))
-    assert(gold_labels["resp"] == pred_labels["resp"])
+    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False))
+    pred_labels = parse_df_labels(pd.read_csv(pred_fn, keep_default_na=False))
+    assert (gold_labels["resp"] == pred_labels["resp"])
     gold_vals = gold_labels["vals"]
     pred_vals = pred_labels["vals"]
 
     # Compute trivial performance
     trivial_val = np.mean(gold_vals)
     trivial_vals = [trivial_val for _ in gold_vals]
-    
-    assert(len(gold_vals) == len(pred_vals))
 
+    assert (len(gold_vals) == len(pred_vals))
 
     # Print mse
-    mse = mean_squared_error(y_true = gold_vals,
-                             y_pred = pred_vals)
+    mse = mean_squared_error(y_true=gold_vals,
+                             y_pred=pred_vals)
 
     logging.info(f"MSE = {mse}")
 
     # Trivial performance for reference
-    trivial_mse = mean_squared_error(y_true = gold_vals,
-                                     y_pred = trivial_vals)
+    trivial_mse = mean_squared_error(y_true=gold_vals,
+                                     y_pred=trivial_vals)
     logging.info(f"For reference, trivial (mean) mse: {trivial_mse}")
 
     # End
