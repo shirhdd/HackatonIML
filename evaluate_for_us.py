@@ -91,7 +91,7 @@ def parse_df_labels(df):
 
 
 if __name__ == "__main__":
-    for param in range(5, 20, 1):
+    for param in range(5, 30, 1):
         pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE, param)
         gold_fn = Path(TEST_Y_FILE)
 
