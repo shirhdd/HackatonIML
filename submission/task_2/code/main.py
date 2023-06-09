@@ -13,7 +13,6 @@ from sklearn.tree import DecisionTreeClassifier
 
 from hackathon_code.Preprocessor import load_data
 from hackathon_code.Preprocessor import preprocessor
-from submission.task_2.code.hackathon_code import pred_utils
 
 USAGE_MSG = """Usage: <program_name> <0/1> <train features file name> <train labels file name> <predict set>"""
 CLASSIFICATION = "0"
