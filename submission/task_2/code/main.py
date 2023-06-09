@@ -7,7 +7,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from sklearn import ensemble
-from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge
 from sklearn.multiclass import OneVsRestClassifier
 
 from submission.task_2.code.hackathon_code.Preprocessor import load_data
@@ -24,7 +24,7 @@ X_TEST_FILE = 4
 
 NUM_OF_METASTASES = 11
 K = 10
-ALPHA = 1
+ALPHA = 2786.44
 
 COLUMN_NAMES_SPACE = [
     'ADR - Adrenals',
@@ -106,7 +106,7 @@ def indicator_matrix_to_lists(dummies, col_names) -> pd.DataFrame:
     return dummies['אבחנה-Location of distal metastases']
 
 
-def predicting_metastases_v1(X_train, X_test, y_train, col_names):
+def predicting_metastases(X_train, X_test, y_train, col_names):
     random_forest = ensemble.RandomForestClassifier(max_depth=10, random_state=42, class_weight="balanced")
     classifier = OneVsRestClassifier(estimator=random_forest)
     classifier.fit(X_train, y_train)
@@ -152,50 +152,14 @@ def load_files_to_array(argv):
     return X_train, y_train, X_test, col_names
 
 
-def predicting_tumer_size_v1(X_train, X_test, y_train):
-    lasso = Lasso(ALPHA)
-    lasso.fit(X_train, y_train)
-    pred = lasso.predict(X_test)
-    pd.DataFrame(pred).to_csv("./task_2/predictions/1.csv", header=["אבחנה-Tumor size"], index=False)
+def predicting_tumer_size(X_train, X_test, y_train):
+    estimator = Ridge(ALPHA)
+    estimator.fit(X_train, y_train)
 
+    pred = estimator.predict(X_test)
+    pred = np.where(pred < 0, 0, pred)
+    pd.DataFrame(pred).to_csv("./task_2/predictions/2.csv", header=["אבחנה-Tumor size"], index=False)
 
-# TODO: remove
-def predicting_tumer_size_v1(X_train, X_test, y_train):
-    from sklearn.linear_model import Ridge
-    from sklearn.metrics import mean_squared_error
-
-    gold_fn = "tests_sets/test1_label_1.csv"
-    gold_labels = parse_df_labels(pd.read_csv(gold_fn, keep_default_na=False, dtype={'אבחנה-Tumor size': str}))
-    gold_vals = gold_labels["vals"]
-
-    # min loss: 3.73851554473353, argmin: 2508.974358974359
-    alphas = np.linspace(2500, 2550, 40)
-    loss = np.zeros(len(alphas))
-    for i, a in enumerate(alphas):
-        lasso = Ridge(alpha=a)
-        lasso.fit(X_train, y_train)
-        pred = lasso.predict(X_test)
-        loss[i] = mean_squared_error(y_true=gold_vals, y_pred=pred)
-
-    lasso = Ridge(alpha=alphas[np.argmin(loss)])
-    lasso.fit(X_train, y_train)
-    y_pred = lasso.predict(X_test)
-    result_eval(y_pred=y_pred, y_true=np.array(gold_vals))
-
-
-def result_eval(y_pred, y_true):
-    y_pred = y_pred.reshape(y_pred.size)
-    y_true = y_true.reshape(y_true.size)
-    wrong = np.sum(y_pred != y_true)
-    pred_positive_index = np.where(y_pred != '[]')
-    false_positive = np.sum(y_pred[pred_positive_index] != y_true[pred_positive_index])
-    pred_negative_index = np.where(y_pred == '[]')
-    print("number of wrong classifications", wrong)
-    print("number of correct classification ", y_pred.size - wrong)
-    print("number of false positive", false_positive)
-    print("number of false negative ", wrong - false_positive)
-    print("number of true positive ", )
-    print("predicted negative ", len(pred_negative_index[0]))
 
 if __name__ == '__main__':
     """
@@ -219,9 +183,8 @@ if __name__ == '__main__':
 
     # Q1
     if (sys.argv[PREDICTION_TYPE] == CLASSIFICATION):
-        predicting_metastases_v1(X_train, X_test, y_train, col_names)
+        predicting_metastases(X_train, X_test, y_train, col_names)
 
     # Q2
     if (sys.argv[PREDICTION_TYPE] == REGRESSION):
-        predicting_tumer_size_v1(X_train, X_test, y_train)
-
+        predicting_tumer_size(X_train, X_test, y_train)

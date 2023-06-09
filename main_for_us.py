@@ -156,4 +156,4 @@ if __name__ == '__main__':
     predicting_metastases_v1(X_train, X_test, y_train, col_names)
 
     # Q2
-    # predicting_tumer_size_v1(X_train, X_test, y_train, y_test)
+    # predicting_tumer_size(X_train, X_test, y_train, y_test)

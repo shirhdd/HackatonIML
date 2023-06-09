@@ -89,23 +89,27 @@ surgery_bef_aft_activity_map = {
 
 def load_data(filename: str):
     df = pd.read_csv(filename, dtype={
+        'אבחנה-Surgery date2': str,
         'אבחנה-Surgery date3': str,
+        'אבחנה-Surgery name2': str,
         'אבחנה-Surgery name3': str,
         'אבחנה-Ivi -Lymphovascular invasion': str
     })
-    df.columns = ['Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
-                  'Diagnosis date', 'Her2', 'Histological diagnosis',
-                  'Histopatological degree', 'Ivi -Lymphovascular invasion',
-                  'KI67 protein', 'Lymphatic penetration',
-                  'M -metastases mark (TNM)', 'Margin Type',
-                  'N -lymph nodes mark (TNM)', 'Nodes exam', 'Positive nodes',
-                  'Side', 'Stage', 'Surgery date1', 'Surgery date2',
-                  'Surgery date3', 'Surgery name1', 'Surgery name2',
-                  'Surgery name3', 'Surgery sum', 'T -Tumor mark (TNM)',
-                  'Tumor depth', 'Tumor width', 'er', 'pr',
-                  'surgery before or after-Activity date',
-                  'surgery before or after-Actual activity',
-                  'id-hushed_internalpatientid']
+    df.columns = [
+        'Form name', 'Hospital', 'User Name', 'Age', 'Basic stage',
+        'Diagnosis date', 'Her2', 'Histological diagnosis',
+        'Histopatological degree', 'Ivi -Lymphovascular invasion',
+        'KI67 protein', 'Lymphatic penetration',
+        'M -metastases mark (TNM)', 'Margin Type',
+        'N -lymph nodes mark (TNM)', 'Nodes exam', 'Positive nodes',
+        'Side', 'Stage', 'Surgery date1', 'Surgery date2',
+        'Surgery date3', 'Surgery name1', 'Surgery name2',
+        'Surgery name3', 'Surgery sum', 'T -Tumor mark (TNM)',
+        'Tumor depth', 'Tumor width', 'er', 'pr',
+        'surgery before or after-Activity date',
+        'surgery before or after-Actual activity',
+        'id-hushed_internalpatientid',
+    ]
     return df
 
 
@@ -188,7 +192,7 @@ def handle_pr_er(df):
             (df[_].str.contains(r'\d{2,}%?', case=False, na=False)) &
             (df[_].str.extract(r'(\d{2,})%?', expand=False).astype(float) >= 50),
             (df[_].str.contains(r'\d{2,}%?', case=False, na=False)) & (
-                        df[_].str.extract(r'(\d{2,})%?', expand=False).astype(float) < 50),
+                    df[_].str.extract(r'(\d{2,})%?', expand=False).astype(float) < 50),
         ]
 
         choices = [-1, 1, 1, 1, -1, 1, -1]
