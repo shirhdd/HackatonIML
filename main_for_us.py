@@ -98,10 +98,10 @@ def loss_func(y_pred, y_true):
 
 def predicting_metastases_v1(X_train, X_test, y_train, col_names, param):
     algo = ensemble.RandomForestClassifier(max_depth=param, random_state=42, class_weight="balanced")
-    # algo = ensemble.AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), n_estimators=param)
+    # algo = ensemble.AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), n_estimators=60)
     # algo = DecisionTreeClassifier(max_depth=param)
     # algo = RidgeClassifier(alpha=param)
-    algo = GaussianProcessClassifier(max_iter_predict=param)
+
     classifier = OneVsRestClassifier(estimator=algo)
     classifier.fit(X_train, y_train)
     pred = classifier.predict(X_test)

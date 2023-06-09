@@ -26,7 +26,7 @@ import numpy as np
 from sklearn.metrics import f1_score
 
 # Local imports
-from main import run_predict_q1
+from main_for_us import run_predict_q1
 
 # ----
 TRAIN_X_FILE = 'train_sets/train.csv'
@@ -91,7 +91,7 @@ def parse_df_labels(df):
 
 
 if __name__ == "__main__":
-    for param in range(1, 200, 10):
+    for param in range(5, 20, 1):
         pred = run_predict_q1(TRAIN_X_FILE, TRAIN_Y_FILE, TEST_X_FILE, param)
         gold_fn = Path(TEST_Y_FILE)
 
