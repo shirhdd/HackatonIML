@@ -8,7 +8,4 @@ updates:
     directory: "/javascript"
     schedule:
       interval: "weekly"
-  - package-ecosystem: pipenv
-    directory: "/python"
-    schedule:
-      interval: "weekly"
+
